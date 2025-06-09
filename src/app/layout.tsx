@@ -1,4 +1,5 @@
 import { ApiProvider } from '@/components/providers/api-provider';
+import { JotaiProvider } from '@/components/providers/jotai-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import type { Metadata } from 'next';
@@ -30,18 +31,20 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <QueryProvider>
-          <ApiProvider>
-            <ThemeProvider
-              attribute={'class'}
-              defaultTheme='system'
-              enableSystem
-              disableTransitionOnChange
-            >
-              {children}
-            </ThemeProvider>
-          </ApiProvider>
-        </QueryProvider>
+        <JotaiProvider>
+          <QueryProvider>
+            <ApiProvider>
+              <ThemeProvider
+                attribute={'class'}
+                defaultTheme='system'
+                enableSystem
+                disableTransitionOnChange
+              >
+                {children}
+              </ThemeProvider>
+            </ApiProvider>
+          </QueryProvider>
+        </JotaiProvider>
       </body>
     </html>
   );

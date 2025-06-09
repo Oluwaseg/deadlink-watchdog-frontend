@@ -1,143 +1,260 @@
 'use client';
-import { Alert } from '@/components/ui/alert';
+
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { AlertCircle, ArrowLeft, CheckCircle } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { resetPassword } from '../api/authApi';
-import { passwordSchema } from '../validation/schemas';
+import { resetPasswordSchema } from '../validation/schemas';
 
-const resetPasswordSchema = z
-  .object({
-    newPassword: passwordSchema,
-    confirmPassword: passwordSchema,
-  })
-  .refine((data) => data.newPassword === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ['confirmPassword'],
-  });
-
-type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
+type ResetPasswordFormData = {
+  newPassword: string;
+  confirmPassword: string;
+  token: string;
+};
 
 interface ResetPasswordFormProps {
   token: string;
 }
 
 export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
   const router = useRouter();
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<ResetPasswordFormData>({
-    resolver: zodResolver(resetPasswordSchema),
+  const [isLoading, setIsLoading] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [formData, setFormData] = useState<ResetPasswordFormData>({
+    newPassword: '',
+    confirmPassword: '',
+    token
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const onSubmit = async (data: ResetPasswordFormData) => {
+  const handleChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
+    setErrors({});
+
+    // Validate form data
+    const validation = resetPasswordSchema.safeParse(formData);
+    if (!validation.success) {
+      const formattedErrors: Record<string, string> = {};
+      validation.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          formattedErrors[err.path[0].toString()] = err.message;
+        }
+      });
+      setErrors(formattedErrors);
+      return;
+    }
+
     try {
       setIsLoading(true);
       setErrorMessage('');
+      setSuccessMessage('');
 
       const response = await resetPassword({
-        token,
-        newPassword: data.newPassword,
+        ...formData,
+        token
       });
 
       if (response.success) {
-        router.push(
-          '/auth/login?message=Your password has been reset successfully. Please log in.'
-        );
+        setSuccessMessage('Password reset successfully! Redirecting to sign in...');
+        setTimeout(() => {
+          setIsNavigating(true);
+          router.push('/auth/login');
+        }, 1500);
       } else {
-        setErrorMessage(
-          response.message || 'Something went wrong. Please try again.'
-        );
+        setErrorMessage(response.message || 'Something went wrong. Please try again.');
       }
-    } catch (error) {
-      setErrorMessage('An error occurred while resetting your password.');
+    } catch (error: any) {
+      const err = error || {};
+      if (err.code) {
+        setErrorMessage(`${err.code}: ${err.error || err.message || 'An error occurred.'}`);
+      } else if (err.error) {
+        setErrorMessage(err.error);
+      } else if (err.message) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage('An error occurred while resetting your password.');
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleBackToLogin = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsNavigating(true);
+    router.push('/auth/login');
+  };
+
   if (!token) {
     return (
-      <Alert variant='destructive'>
-        Invalid or missing reset token. Please request a new password reset
-        link.
-      </Alert>
+      <div className='w-full'>
+        <Card className='border-0 shadow-none lg:shadow-lg lg:border'>
+          <CardContent className='pt-6'>
+            <Alert variant='destructive'>
+              <AlertCircle className='h-4 w-4' />
+              <AlertDescription>
+                Invalid or missing reset token. Please request a new password reset link.
+              </AlertDescription>
+            </Alert>
+            <div className='mt-4 text-center'>
+              <Link
+                href='/auth/login'
+                onClick={handleBackToLogin}
+                className='inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors'
+              >
+                {isNavigating ? (
+                  <>
+                    <div className='h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
+                    Redirecting...
+                  </>
+                ) : (
+                  <>
+                    <ArrowLeft className='h-3 w-3' />
+                    Back to Sign In
+                  </>
+                )}
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <div className='grid gap-6'>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <div className='grid gap-4'>
-          <div className='grid gap-2'>
-            <Label htmlFor='newPassword'>New Password</Label>
-            <Input
-              id='newPassword'
-              type='password'
-              autoComplete='new-password'
-              disabled={isLoading}
-              {...register('newPassword')}
-            />
-            {errors.newPassword && (
-              <p className='text-sm text-destructive'>
-                {errors.newPassword.message}
-              </p>
+    <div className='w-full'>
+      <Card className='border-0 shadow-none lg:shadow-lg lg:border'>
+        <CardHeader className='space-y-1 text-center pb-6'>
+          <CardTitle className='text-2xl font-bold text-foreground'>
+            Reset Password
+          </CardTitle>
+          <CardDescription className='text-muted-foreground'>
+            Enter your new password below
+          </CardDescription>
+        </CardHeader>
+
+        <CardContent className='space-y-6'>
+          <form onSubmit={handleSubmit} className='space-y-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='newPassword'>New Password</Label>
+              <Input
+                id='newPassword'
+                type='password'
+                placeholder='••••••••'
+                value={formData.newPassword}
+                onChange={(e) => handleChange('newPassword', e.target.value)}
+                className={errors.newPassword ? 'border-destructive' : ''}
+                disabled={isLoading || isNavigating}
+              />
+              {errors.newPassword && (
+                <p className='text-sm text-destructive flex items-center gap-1'>
+                  <AlertCircle className='h-3 w-3' />
+                  {errors.newPassword}
+                </p>
+              )}
+            </div>
+
+            <div className='space-y-2'>
+              <Label htmlFor='confirmPassword'>Confirm Password</Label>
+              <Input
+                id='confirmPassword'
+                type='password'
+                placeholder='••••••••'
+                value={formData.confirmPassword}
+                onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                className={errors.confirmPassword ? 'border-destructive' : ''}
+                disabled={isLoading || isNavigating}
+              />
+              {errors.confirmPassword && (
+                <p className='text-sm text-destructive flex items-center gap-1'>
+                  <AlertCircle className='h-3 w-3' />
+                  {errors.confirmPassword}
+                </p>
+              )}
+            </div>
+
+            {errorMessage && (
+              <Alert variant='destructive'>
+                <AlertCircle className='h-4 w-4' />
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
             )}
+
+            {successMessage && (
+              <Alert className='border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200'>
+                <CheckCircle className='h-4 w-4 text-green-600 dark:text-green-400' />
+                <AlertDescription className='text-green-800 dark:text-green-200'>
+                  {successMessage}
+                </AlertDescription>
+              </Alert>
+            )}
+
+            <Button
+              type='submit'
+              disabled={isLoading || isNavigating}
+              className='w-full bg-primary hover:bg-primary/90 text-primary-foreground'
+              size='lg'
+            >
+              {isLoading ? (
+                <div className='flex items-center gap-2'>
+                  <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent'></div>
+                  Resetting Password...
+                </div>
+              ) : isNavigating ? (
+                <div className='flex items-center gap-2'>
+                  <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent'></div>
+                  Redirecting...
+                </div>
+              ) : (
+                'Reset Password'
+              )}
+            </Button>
+          </form>
+
+          <div className='text-center'>
+            <Link
+              href='/auth/login'
+              onClick={handleBackToLogin}
+              className='inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors'
+            >
+              {isNavigating ? (
+                <>
+                  <div className='h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
+                  Redirecting...
+                </>
+              ) : (
+                <>
+                  <ArrowLeft className='h-3 w-3' />
+                  Back to Sign In
+                </>
+              )}
+            </Link>
           </div>
-
-          <div className='grid gap-2'>
-            <Label htmlFor='confirmPassword'>Confirm Password</Label>
-            <Input
-              id='confirmPassword'
-              type='password'
-              autoComplete='new-password'
-              disabled={isLoading}
-              {...register('confirmPassword')}
-            />
-            {errors.confirmPassword && (
-              <p className='text-sm text-destructive'>
-                {errors.confirmPassword.message}
-              </p>
-            )}
-          </div>
-
-          {errorMessage && <Alert variant='destructive'>{errorMessage}</Alert>}
-
-          <Button disabled={isLoading}>
-            {isLoading ? (
-              <div className='flex items-center gap-2'>
-                <div className='h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent' />
-                <span>Processing...</span>
-              </div>
-            ) : (
-              'Reset Password'
-            )}
-          </Button>
-        </div>
-      </form>
-
-      <div className='relative'>
-        <div className='absolute inset-0 flex items-center'>
-          <span className='w-full border-t' />
-        </div>
-        <div className='relative flex justify-center text-xs uppercase'>
-          <span className='bg-background px-2 text-muted-foreground'>Or</span>
-        </div>
-      </div>
-
-      <Button variant='outline' onClick={() => router.push('/auth/login')}>
-        Back to Login
-      </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }

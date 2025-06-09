@@ -1,63 +1,247 @@
 'use client';
 
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { AlertCircle, Loader2, MailCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AuthForm } from './AuthForm';
-import { useLogin } from '../hooks/useAuth';
+import { useState } from 'react';
+import { loginUser, resendVerification } from '../api/authApi';
 import { loginSchema } from '../validation/schemas';
-import type { LoginForm } from '../types';
-
-const fields = [
-  { name: 'email', type: 'email' as const, placeholder: 'john@example.com', label: 'Email' },
-  { name: 'password', type: 'password' as const, placeholder: '••••••••', label: 'Password' },
-];
 
 export function LoginForm() {
   const router = useRouter();
-  const loginMutation = useLogin();
+  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errorMessage, setErrorMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [emailNotVerified, setEmailNotVerified] = useState(false);
+  const [unverifiedEmail, setUnverifiedEmail] = useState('');
+  const [resendStatus, setResendStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [resendMessage, setResendMessage] = useState('');
 
-  const handleSubmit = (data: LoginForm) => {
-    loginMutation.mutate(data, {
-      onSuccess: () => {
-        router.push('/dashboard'); // Redirect to dashboard after login
-      },
-    });
+  const handleChange = (name: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
   };
 
-  const footer = (
-    <div className="space-y-3">
-      <div className="text-center">
-        <Link 
-          href="/auth/forgot-password" 
-          className="text-sm font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
-        >
-          Forgot your password?
-        </Link>
-      </div>
-      <div className="text-center">
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Don't have an account?{' '}
-          <Link 
-            href="/auth/register" 
-            className="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400"
-          >
-            Sign up
-          </Link>
-        </p>
-      </div>
-    </div>
-  );
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage('');
+    setEmailNotVerified(false);
+    setResendStatus('idle');
+    setResendMessage('');
+
+    // Validate form data
+    const validation = loginSchema.safeParse(formData);
+    if (!validation.success) {
+      const formattedErrors: Record<string, string> = {};
+      validation.error.errors.forEach((err) => {
+        if (err.path[0]) {
+          formattedErrors[err.path[0].toString()] = err.message;
+        }
+      });
+      setErrors(formattedErrors);
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      const response = await loginUser(formData);
+      if (response.success) {
+        setIsNavigating(true);
+        router.push('/dashboard');
+      } else {
+        setErrorMessage(response.message || 'Request failed');
+      }
+    } catch (error: any) {
+      // Use the full error object from the API client
+      const err = error || {};
+      if (err.code === 'EMAIL_NOT_VERIFIED') {
+        setEmailNotVerified(true);
+        setUnverifiedEmail(formData.email);
+        setErrorMessage(err.error || err.message || 'Please verify your email before logging in.');
+      } else if (err.error) {
+        setErrorMessage(err.error);
+      } else if (err.message) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage('Request failed');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResendStatus('loading');
+    setResendMessage('');
+    try {
+      const res = await resendVerification({ email: unverifiedEmail });
+      if (res.success) {
+        setResendStatus('success');
+        setResendMessage(res.message || 'Verification email sent! Please check your inbox.');
+        // Store email for the verify page
+        localStorage.setItem('pendingVerificationEmail', unverifiedEmail);
+        // Redirect after a short delay
+        setTimeout(() => {
+          router.push('/auth/verify-email');
+        }, 1200);
+      } else {
+        setResendStatus('error');
+        setResendMessage(res.message || 'Failed to send verification email.');
+      }
+    } catch (err: any) {
+      setResendStatus('error');
+      setResendMessage(err.error || err.message || 'Failed to send verification email.');
+    }
+  };
+
+  const handleBackToLogin = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsNavigating(true);
+    router.push('/auth/login');
+  };
 
   return (
-    <AuthForm
-      title="Sign In"
-      fields={fields}
-      submitText="Sign In"
-      onSubmit={handleSubmit}
-      isLoading={loginMutation.isPending}
-      error={loginMutation.error?.message}
-      validationSchema={loginSchema}
-      footer={footer}
-    />
+    <div className='w-full'>
+      <Card className='border-0 shadow-none lg:shadow-lg lg:border'>
+        <CardHeader className='space-y-1 text-center pb-6'>
+          <CardTitle className='text-2xl font-bold text-foreground'>Sign In</CardTitle>
+          <CardDescription className='text-muted-foreground'>
+            Enter your credentials to access your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent className='space-y-6'>
+          <form onSubmit={handleSubmit} className='space-y-4'>
+            <div className='space-y-2'>
+              <Label htmlFor='email'>Email</Label>
+              <Input
+                id='email'
+                type='email'
+                placeholder='name@example.com'
+                value={formData.email}
+                onChange={(e) => handleChange('email', e.target.value)}
+                className={errors.email ? 'border-destructive' : ''}
+                disabled={isLoading || isNavigating}
+              />
+              {errors.email && (
+                <p className='text-sm text-destructive flex items-center gap-1'>
+                  <AlertCircle className='h-3 w-3' />
+                  {errors.email}
+                </p>
+              )}
+            </div>
+            <div className='space-y-2'>
+              <Label htmlFor='password'>Password</Label>
+              <Input
+                id='password'
+                type='password'
+                placeholder='••••••••'
+                value={formData.password}
+                onChange={(e) => handleChange('password', e.target.value)}
+                className={errors.password ? 'border-destructive' : ''}
+                disabled={isLoading || isNavigating}
+              />
+              {errors.password && (
+                <p className='text-sm text-destructive flex items-center gap-1'>
+                  <AlertCircle className='h-3 w-3' />
+                  {errors.password}
+                </p>
+              )}
+            </div>
+
+            {emailNotVerified && (
+              <Alert variant='destructive' className='flex flex-col gap-2'>
+                <MailCheck className='h-4 w-4 text-yellow-500' />
+                <AlertDescription>
+                  Please verify your email before logging in.
+                </AlertDescription>
+                <Button
+                  type='button'
+                  onClick={handleResendVerification}
+                  disabled={resendStatus === 'loading'}
+                  className='w-fit mt-2 bg-yellow-500 hover:bg-yellow-600 text-white'
+                >
+                  {resendStatus === 'loading' ? (
+                    <span className='flex items-center gap-2'>
+                      <Loader2 className='h-4 w-4 animate-spin' /> Sending...
+                    </span>
+                  ) : (
+                    'Resend Verification Email'
+                  )}
+                </Button>
+                {resendStatus === 'success' && (
+                  <span className='text-green-600 text-sm'>{resendMessage}</span>
+                )}
+                {resendStatus === 'error' && (
+                  <span className='text-destructive text-sm'>{resendMessage}</span>
+                )}
+              </Alert>
+            )}
+
+            {errorMessage && (!emailNotVerified || resendStatus === 'error') && (
+              <Alert variant='destructive'>
+                <AlertCircle className='h-4 w-4' />
+                <AlertDescription>{errorMessage}</AlertDescription>
+              </Alert>
+            )}
+
+            <Button
+              type='submit'
+              disabled={isLoading || isNavigating}
+              className='w-full bg-primary hover:bg-primary/90 text-primary-foreground'
+              size='lg'
+            >
+              {isLoading ? (
+                <div className='flex items-center gap-2'>
+                  <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent'></div>
+                  Signing In...
+                </div>
+              ) : isNavigating ? (
+                <div className='flex items-center gap-2'>
+                  <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent'></div>
+                  Redirecting...
+                </div>
+              ) : (
+                'Sign In'
+              )}
+            </Button>
+          </form>
+
+          <div className='text-center'>
+            <Link
+              href='/auth/forgot-password'
+              className='text-sm font-medium text-primary hover:text-primary/80 transition-colors'
+            >
+              Forgot your password?
+            </Link>
+          </div>
+          <div className='text-center'>
+            <span className='text-sm text-muted-foreground'>
+              Don't have an account?{' '}
+              <Link
+                href='/auth/register'
+                className='font-medium text-primary hover:text-primary/80 transition-colors'
+              >
+                Sign up
+              </Link>
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
