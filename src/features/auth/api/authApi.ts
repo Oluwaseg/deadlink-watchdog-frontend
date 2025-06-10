@@ -91,3 +91,9 @@ export const resetPassword = async (
   const apiClient = getApiClient();
   return apiClient.post(`${API_BASE}/reset-password`, data);
 };
+
+// Logout
+export const logout = async (): Promise<void> => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
+};
