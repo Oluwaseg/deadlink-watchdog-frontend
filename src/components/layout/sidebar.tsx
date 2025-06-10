@@ -1,183 +1,219 @@
-"use client"
+'use client';
 
-import { ModeToggle } from "@/components/shared/switch"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { ModeToggle } from '@/components/shared/switch';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarGroup,
-    SidebarGroupContent,
-    SidebarGroupLabel,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
-    SidebarRail,
-} from "@/components/ui/sidebar"
-import { logout } from "@/features/auth/api/authApi"
-import { useCurrentUser } from "@/features/auth/hooks/useCurrentUser"
-import { BarChart3, ChevronRight, Globe, LogOut, Search, Settings, Shield, User } from "lucide-react"
-import NextLink from "next/link"
-import { usePathname, useRouter } from "next/navigation"
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+} from '@/components/ui/sidebar';
+import { logout } from '@/features/auth/api/authApi';
+import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
+import {
+  Activity,
+  AlertCircle,
+  BarChart3,
+  ChevronDown,
+  Globe,
+  LogOut,
+  Search,
+  Settings,
+  Shield,
+  User,
+} from 'lucide-react';
+import NextLink from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 
 const navigation = [
-    { name: "Dashboard", href: "/dashboard", icon: BarChart3 },
-    { name: "Websites", href: "/dashboard/websites", icon: Globe },
-    { name: "Broken Links", href: "/dashboard/broken-links", icon: Globe },
-    { name: "Crawls", href: "/dashboard/crawls", icon: Search },
-]
+  { name: 'Dashboard', href: '/dashboard', icon: BarChart3 },
+  { name: 'Websites', href: '/dashboard/websites', icon: Globe },
+  { name: 'Broken Links', href: '/dashboard/broken-links', icon: AlertCircle },
+  { name: 'Crawls', href: '/dashboard/crawls', icon: Search },
+];
 
-const secondaryNavigation = [{ name: "Settings", href: "/dashboard/settings", icon: Settings }]
+const secondaryNavigation = [
+  { name: 'Settings', href: '/dashboard/settings', icon: Settings },
+];
 
 export function DashboardSidebar() {
-    const pathname = usePathname()
-    const router = useRouter()
-    const { data: user } = useCurrentUser()
+  const pathname = usePathname();
+  const router = useRouter();
+  const { data: user } = useCurrentUser();
 
-    const handleLogout = async () => {
-        try {
-            await logout()
-            router.push("/auth/login")
-        } catch (error) {
-            console.error("Logout failed:", error)
-        }
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push('/auth/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
     }
+  };
 
-    return (
-        <Sidebar collapsible="icon" className="border-r border-border">
-            <SidebarHeader className="border-b border-border">
-                <div className="flex items-center justify-between px-3 py-2">
-                    <div className="flex items-center space-x-3">
-                        <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                            <Shield className="h-5 w-5 text-primary-foreground" />
-                        </div>
-                        <div className="group-data-[collapsible=icon]:hidden">
-                            <span className="text-lg font-bold text-foreground">DeadLink</span>
-                            <div className="text-xs text-muted-foreground font-medium">WATCHDOG</div>
-                        </div>
-                    </div>
-                    <div className="group-data-[collapsible=icon]:hidden">
-                        <ModeToggle />
-                    </div>
+  return (
+    <Sidebar collapsible='icon'>
+      <SidebarHeader>
+        <div className='flex items-center gap-2 px-2 py-2'>
+          <div className='flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground'>
+            <Shield className='size-4' />
+          </div>
+          <div className='grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden'>
+            <span className='truncate font-semibold'>DeadLink</span>
+            <span className='truncate text-xs'>WATCHDOG</span>
+          </div>
+          <div className='group-data-[collapsible=icon]:hidden'>
+            <ModeToggle />
+          </div>
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navigation.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <SidebarMenuItem key={item.name}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.name}
+                    >
+                      <NextLink href={item.href}>
+                        <item.icon />
+                        <span>{item.name}</span>
+                      </NextLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Management</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {secondaryNavigation.map((item) => {
+                const isActive = pathname === item.href;
+                return (
+                  <SidebarMenuItem key={item.name}>
+                    <SidebarMenuButton
+                      asChild
+                      isActive={isActive}
+                      tooltip={item.name}
+                    >
+                      <NextLink href={item.href}>
+                        <item.icon />
+                        <span>{item.name}</span>
+                      </NextLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Status Section - Only show when expanded */}
+        <SidebarGroup className='group-data-[collapsible=icon]:hidden'>
+          <SidebarGroupLabel>System Status</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <div className='rounded-lg border bg-background p-3'>
+              <div className='flex items-center gap-2 mb-2'>
+                <Activity className='h-4 w-4 text-primary' />
+                <span className='text-sm font-medium'>All Systems Online</span>
+              </div>
+              <div className='flex items-center justify-between text-xs text-muted-foreground'>
+                <span>Uptime: 99.9%</span>
+                <div className='flex items-center gap-1'>
+                  <div className='h-2 w-2 rounded-full bg-primary animate-pulse' />
+                  <span>Live</span>
                 </div>
-            </SidebarHeader>
+              </div>
+            </div>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
 
-            <SidebarContent>
-                <SidebarGroup>
-                    <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            {navigation.map((item) => {
-                                const isActive = pathname === item.href
-                                return (
-                                    <SidebarMenuItem key={item.name}>
-                                        <SidebarMenuButton asChild isActive={isActive}>
-                                            <NextLink href={item.href}>
-                                                <item.icon className="h-5 w-5" />
-                                                <span>{item.name}</span>
-                                            </NextLink>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                )
-                            })}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
-
-                <SidebarGroup>
-                    <SidebarGroupLabel>Management</SidebarGroupLabel>
-                    <SidebarGroupContent>
-                        <SidebarMenu>
-                            {secondaryNavigation.map((item) => {
-                                const isActive = pathname === item.href
-                                return (
-                                    <SidebarMenuItem key={item.name}>
-                                        <SidebarMenuButton asChild isActive={isActive}>
-                                            <NextLink href={item.href}>
-                                                <item.icon className="h-5 w-5" />
-                                                <span>{item.name}</span>
-                                            </NextLink>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                )
-                            })}
-                        </SidebarMenu>
-                    </SidebarGroupContent>
-                </SidebarGroup>
-
-                {/* Status Card */}
-                <SidebarGroup className="group-data-[collapsible=icon]:hidden">
-                    <div className="mx-3 p-4 rounded-lg bg-card border border-border">
-                        <div className="flex items-center space-x-2 mb-2">
-                            <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
-                            <span className="text-sm font-medium text-card-foreground">System Status</span>
-                        </div>
-                        <p className="text-xs text-muted-foreground mb-3">All monitoring services operational</p>
-                        <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div>
-                                <div className="font-medium text-primary">99.9%</div>
-                                <div className="text-muted-foreground">Uptime</div>
-                            </div>
-                            <div>
-                                <div className="font-medium text-secondary">24/7</div>
-                                <div className="text-muted-foreground">Active</div>
-                            </div>
-                        </div>
-                    </div>
-                </SidebarGroup>
-            </SidebarContent>
-
-            <SidebarFooter className="border-t border-border">
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <SidebarMenuButton className="w-full">
-                                    <Avatar className="h-6 w-6">
-                                        <AvatarFallback className="bg-primary text-primary-foreground text-xs">
-                                            {user?.firstName?.[0] || user?.email?.[0] || "?"}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex-1 text-left group-data-[collapsible=icon]:hidden">
-                                        <div className="text-sm font-medium text-foreground truncate">{user?.firstName || "User"}</div>
-                                        <div className="text-xs text-muted-foreground truncate">{user?.email}</div>
-                                    </div>
-                                    <ChevronRight className="h-4 w-4 group-data-[collapsible=icon]:hidden" />
-                                </SidebarMenuButton>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent side="top" className="w-56">
-                                <DropdownMenuItem asChild>
-                                    <NextLink href="/dashboard/profile">
-                                        <User className="h-4 w-4 mr-2" />
-                                        Profile
-                                    </NextLink>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem asChild>
-                                    <NextLink href="/dashboard/settings">
-                                        <Settings className="h-4 w-4 mr-2" />
-                                        Settings
-                                    </NextLink>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-                                    <LogOut className="h-4 w-4 mr-2" />
-                                    Logout
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </SidebarMenuItem>
-                </SidebarMenu>
-            </SidebarFooter>
-
-            <SidebarRail />
-        </Sidebar>
-    )
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size='lg'
+                  className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground'
+                >
+                  <Avatar className='h-8 w-8 rounded-lg'>
+                    <AvatarFallback className='rounded-lg bg-primary text-primary-foreground'>
+                      {user?.firstName?.[0] || user?.email?.[0] || '?'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className='grid flex-1 text-left text-sm leading-tight'>
+                    <span className='truncate font-semibold'>
+                      {user?.firstName || 'User'}
+                    </span>
+                    <span className='truncate text-xs'>{user?.email}</span>
+                  </div>
+                  <ChevronDown className='ml-auto size-4' />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className='w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg'
+                side='bottom'
+                align='end'
+                sideOffset={4}
+              >
+                <DropdownMenuItem>
+                  <NextLink
+                    href='/dashboard/profile'
+                    className='flex items-center w-full'
+                  >
+                    <User className='mr-2 h-4 w-4' />
+                    Profile
+                  </NextLink>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <NextLink
+                    href='/dashboard/settings'
+                    className='flex items-center w-full'
+                  >
+                    <Settings className='mr-2 h-4 w-4' />
+                    Settings
+                  </NextLink>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className='text-destructive'
+                >
+                  <LogOut className='mr-2 h-4 w-4' />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+      <SidebarRail />
+    </Sidebar>
+  );
 }

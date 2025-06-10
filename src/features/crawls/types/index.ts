@@ -64,7 +64,7 @@ export interface CrawlResultResponse {
 export interface CrawlsResponse {
     success: boolean;
     data: {
-        crawls: CrawlResult[];
+        crawlResults: CrawlResult[];
         pagination: {
             page: number;
             pages: number;

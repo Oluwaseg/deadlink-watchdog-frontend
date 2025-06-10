@@ -51,7 +51,7 @@ export default function CrawlsPage() {
         return null;
     }
 
-    const { crawls: crawlResults, pagination } = data.data;
+    const { crawlResults, pagination } = data.data;
 
     return (
         <div className="space-y-6">
