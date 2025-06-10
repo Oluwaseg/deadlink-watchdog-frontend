@@ -15,11 +15,13 @@ import { AlertCircle, Loader2, MailCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { loginUser, resendVerification } from '../api/authApi';
+import { resendVerification } from '../api/authApi';
+import { useLogin } from '../hooks/useAuth';
 import { loginSchema } from '../validation/schemas';
 
 export function LoginForm() {
   const router = useRouter();
+  const loginMutation = useLogin();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [errorMessage, setErrorMessage] = useState('');
@@ -59,27 +61,30 @@ export function LoginForm() {
 
     try {
       setIsLoading(true);
-      const response = await loginUser(formData);
-      if (response.success) {
-        setIsNavigating(true);
-        router.push('/dashboard');
-      } else {
-        setErrorMessage(response.message || 'Request failed');
-      }
-    } catch (error: any) {
-      // Use the full error object from the API client
-      const err = error || {};
-      if (err.code === 'EMAIL_NOT_VERIFIED') {
-        setEmailNotVerified(true);
-        setUnverifiedEmail(formData.email);
-        setErrorMessage(err.error || err.message || 'Please verify your email before logging in.');
-      } else if (err.error) {
-        setErrorMessage(err.error);
-      } else if (err.message) {
-        setErrorMessage(err.message);
-      } else {
-        setErrorMessage('Request failed');
-      }
+      loginMutation.mutate(formData, {
+        onSuccess: (response) => {
+          if (response.success) {
+            setIsNavigating(true);
+            router.push('/dashboard');
+          } else {
+            setErrorMessage(response.message || 'Request failed');
+          }
+        },
+        onError: (error: any) => {
+          const err = error || {};
+          if (err.code === 'EMAIL_NOT_VERIFIED') {
+            setEmailNotVerified(true);
+            setUnverifiedEmail(formData.email);
+            setErrorMessage(err.error || err.message || 'Please verify your email before logging in.');
+          } else if (err.error) {
+            setErrorMessage(err.error);
+          } else if (err.message) {
+            setErrorMessage(err.message);
+          } else {
+            setErrorMessage('Request failed');
+          }
+        }
+      });
     } finally {
       setIsLoading(false);
     }
