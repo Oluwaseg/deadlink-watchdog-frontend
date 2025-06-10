@@ -1,14 +1,14 @@
 'use client';
 
-import { useAtomValue, useSetAtom } from 'jotai';
-import { useEffect } from 'react';
 import { createApiClient } from '@/lib/api-client';
-import { 
-  accessTokenAtom, 
-  refreshTokenAtom, 
-  loginAtom, 
-  logoutAtom 
+import {
+  accessTokenAtom,
+  loginAtom,
+  logoutAtom,
+  refreshTokenAtom
 } from '@/lib/auth-atoms';
+import { useAtomValue, useSetAtom } from 'jotai';
+import { useEffect, useRef } from 'react';
 
 interface ApiProviderProps {
   children: React.ReactNode;
@@ -19,8 +19,15 @@ export function ApiProvider({ children }: ApiProviderProps) {
   const refreshToken = useAtomValue(refreshTokenAtom);
   const login = useSetAtom(loginAtom);
   const logout = useSetAtom(logoutAtom);
+  const isInitialized = useRef(false);
 
   useEffect(() => {
+    // Skip initialization if tokens are null and we haven't initialized yet
+    // This prevents the API client from being initialized with null tokens
+    if (!accessToken && !refreshToken && !isInitialized.current) {
+      return;
+    }
+
     // Initialize API client with token management
     createApiClient({
       baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -42,6 +49,8 @@ export function ApiProvider({ children }: ApiProviderProps) {
         logout();
       },
     });
+
+    isInitialized.current = true;
   }, [accessToken, refreshToken, login, logout]);
 
   return <>{children}</>;

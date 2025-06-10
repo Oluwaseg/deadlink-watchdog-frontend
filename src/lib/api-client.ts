@@ -68,6 +68,11 @@ class ApiClient {
     const url = `${this.baseURL}${endpoint}`;
     const token = this.getToken();
 
+    // Skip auth-required endpoints if no token is available
+    if (!token && endpoint !== '/api/auth/login' && endpoint !== '/api/auth/register' && endpoint !== '/api/auth/refresh') {
+      throw new Error('Authentication required');
+    }
+
     // Prepare headers
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
