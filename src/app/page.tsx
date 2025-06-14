@@ -245,13 +245,19 @@ export default function LandingPage() {
               transition={{ delay: 0.4 }}
             >
               <Button variant='ghost' size='sm'>
-                Sign In
+                <Link href='/auth/login' className='flex items-center'>
+                  Sign In
+                </Link>
               </Button>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Button size='sm'>Get Started</Button>
+                <Button size='sm'>
+                  <Link href='/auth/register' className='flex items-center'>
+                    Get Started
+                  </Link>
+                </Button>
               </motion.div>
             </motion.div>
           </div>
@@ -403,14 +409,14 @@ export default function LandingPage() {
                     </div>
                   </motion.div>
                 ) : (
-                  // Actual Video (replace with your video URL)
+                  // Actual Video
                   <video
                     className='w-full h-full object-cover'
                     controls
                     autoPlay
-                    poster='/placeholder.svg?height=600&width=800'
+                    playsInline
                   >
-                    <source src='your-video-url.mp4' type='video/mp4' />
+                    <source src="/video.mp4" type='video/mp4' />
                     Your browser does not support the video tag.
                   </video>
                 )}

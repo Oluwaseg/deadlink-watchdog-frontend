@@ -33,19 +33,19 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <JotaiProvider>
-          <QueryProvider>
-            <ApiProvider>
-              <ThemeProvider
-                attribute={'class'}
-                defaultTheme='system'
-                enableSystem
-                disableTransitionOnChange
-              >
+          <ThemeProvider
+            attribute={'class'}
+            defaultTheme='system'
+            enableSystem
+            disableTransitionOnChange
+          >
+            <QueryProvider>
+              <ApiProvider>
                 {children}
                 <Toaster />
-              </ThemeProvider>
-            </ApiProvider>
-          </QueryProvider>
+              </ApiProvider>
+            </QueryProvider>
+          </ThemeProvider>
         </JotaiProvider>
       </body>
     </html>

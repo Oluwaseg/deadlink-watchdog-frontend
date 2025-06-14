@@ -1,6 +1,4 @@
-// Enhanced API client with automatic token injection and refresh
-
-interface ApiClientOptions {
+export interface ApiClientOptions {
   baseURL?: string;
   getToken?: () => string | null;
   getRefreshToken?: () => string | null;
@@ -11,12 +9,12 @@ interface ApiClientOptions {
   onAuthError?: () => void;
 }
 
-interface RefreshTokenResponse {
+export interface RefreshTokenResponse {
   accessToken: string;
   refreshToken: string;
 }
 
-class ApiClient {
+export class ApiClient {
   private baseURL: string;
   private getToken: () => string | null;
   private getRefreshToken: () => string | null;
@@ -29,7 +27,7 @@ class ApiClient {
   private refreshPromise: Promise<RefreshTokenResponse> | null = null;
 
   constructor(options: ApiClientOptions) {
-    this.baseURL = options.baseURL || process.env.NEXT_PUBLIC_API_URL || '';
+    this.baseURL = options.baseURL || '';
     this.getToken = options.getToken || (() => null);
     this.getRefreshToken = options.getRefreshToken || (() => null);
     this.onTokenRefresh = options.onTokenRefresh;
@@ -42,7 +40,7 @@ class ApiClient {
       throw new Error('No refresh token available');
     }
 
-    const response = await fetch(`${this.baseURL}/auth/refresh`, {
+    const response = await fetch(`${this.baseURL}/api/auth/refresh`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -68,11 +66,6 @@ class ApiClient {
     const url = `${this.baseURL}${endpoint}`;
     const token = this.getToken();
 
-    // Skip auth-required endpoints if no token is available
-    if (!token && endpoint !== '/api/auth/login' && endpoint !== '/api/auth/register' && endpoint !== '/api/auth/refresh') {
-      throw new Error('Authentication required');
-    }
-
     // Prepare headers
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -93,7 +86,6 @@ class ApiClient {
     // Handle 401 - try to refresh token
     if (response.status === 401 && token && this.getRefreshToken()) {
       try {
-        // Prevent multiple refresh attempts
         if (!this.isRefreshing) {
           this.isRefreshing = true;
           this.refreshPromise = this.refreshAccessToken();
@@ -132,7 +124,6 @@ class ApiClient {
     return response.json();
   }
 
-  // Convenience methods
   get<T = unknown>(endpoint: string, options?: RequestInit): Promise<T> {
     return this.request<T>(endpoint, { ...options, method: 'GET' });
   }
@@ -178,7 +169,6 @@ class ApiClient {
   }
 }
 
-// Create a singleton instance
 let apiClientInstance: ApiClient | null = null;
 
 export const createApiClient = (options: ApiClientOptions): ApiClient => {
@@ -192,5 +182,3 @@ export const getApiClient = (): ApiClient => {
   }
   return apiClientInstance;
 };
-
-export { ApiClient };

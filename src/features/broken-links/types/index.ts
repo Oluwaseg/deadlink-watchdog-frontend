@@ -12,10 +12,16 @@ export interface ErrorSummary {
     count: number;
 }
 
+export interface Pagination {
+    total: number;
+    pages: number;
+}
+
 export interface BrokenLinksResponse {
     success: boolean;
     data: {
         summary: ErrorSummary[];
         recentBrokenLinks: BrokenLink[];
+        pagination: Pagination;
     };
-} 
+}

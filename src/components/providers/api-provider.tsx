@@ -8,10 +8,15 @@ import {
   refreshTokenAtom
 } from '@/lib/auth-atoms';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 
 interface ApiProviderProps {
   children: React.ReactNode;
+}
+
+interface TokenResponse {
+  accessToken: string;
+  refreshToken: string;
 }
 
 export function ApiProvider({ children }: ApiProviderProps) {
@@ -19,22 +24,13 @@ export function ApiProvider({ children }: ApiProviderProps) {
   const refreshToken = useAtomValue(refreshTokenAtom);
   const login = useSetAtom(loginAtom);
   const logout = useSetAtom(logoutAtom);
-  const isInitialized = useRef(false);
 
   useEffect(() => {
-    // Skip initialization if tokens are null and we haven't initialized yet
-    // This prevents the API client from being initialized with null tokens
-    if (!accessToken && !refreshToken && !isInitialized.current) {
-      return;
-    }
-
-    // Initialize API client with token management
     createApiClient({
-      baseURL: process.env.NEXT_PUBLIC_API_URL,
+      baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001',
       getToken: () => accessToken,
       getRefreshToken: () => refreshToken,
-      onTokenRefresh: (newTokens) => {
-        // Update tokens in Jotai atoms when refreshed
+      onTokenRefresh: (newTokens: TokenResponse) => {
         const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
         if (currentUser) {
           login({
@@ -44,13 +40,8 @@ export function ApiProvider({ children }: ApiProviderProps) {
           });
         }
       },
-      onAuthError: () => {
-        // Clear auth state when auth fails
-        logout();
-      },
+      onAuthError: () => logout(),
     });
-
-    isInitialized.current = true;
   }, [accessToken, refreshToken, login, logout]);
 
   return <>{children}</>;
