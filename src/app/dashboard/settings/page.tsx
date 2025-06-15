@@ -73,10 +73,11 @@ export default function SettingsPage() {
         title: 'Success',
         description: response.message,
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to update profile';
       toast({
         title: 'Error',
-        description: error.message || 'Failed to update profile',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -126,10 +127,11 @@ export default function SettingsPage() {
         newPassword: '',
         confirmPassword: '',
       });
-    } catch (error: any) {
+    } catch (error: Error | unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to change password';
       toast({
         title: 'Error',
-        description: error.message || 'Failed to change password',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -432,7 +434,7 @@ export default function SettingsPage() {
                     </div>
                     {passwordData.confirmPassword &&
                       passwordData.newPassword !==
-                        passwordData.confirmPassword && (
+                      passwordData.confirmPassword && (
                         <p className='text-xs text-destructive'>
                           Passwords do not match
                         </p>

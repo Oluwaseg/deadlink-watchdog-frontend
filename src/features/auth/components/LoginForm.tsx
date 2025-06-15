@@ -70,18 +70,14 @@ export function LoginForm() {
             setErrorMessage(response.message || 'Request failed');
           }
         },
-        onError: (error: any) => {
-          const err = error || {};
-          if (err.code === 'EMAIL_NOT_VERIFIED') {
+        onError: (error: Error | unknown) => {
+          const err = error instanceof Error ? error : new Error('An error occurred');
+          if ('code' in err && err.code === 'EMAIL_NOT_VERIFIED') {
             setEmailNotVerified(true);
             setUnverifiedEmail(formData.email);
-            setErrorMessage(err.error || err.message || 'Please verify your email before logging in.');
-          } else if (err.error) {
-            setErrorMessage(err.error);
-          } else if (err.message) {
-            setErrorMessage(err.message);
+            setErrorMessage(err.message || 'Please verify your email before logging in.');
           } else {
-            setErrorMessage('Request failed');
+            setErrorMessage(err.message || 'Request failed');
           }
         }
       });
@@ -108,9 +104,10 @@ export function LoginForm() {
         setResendStatus('error');
         setResendMessage(res.message || 'Failed to send verification email.');
       }
-    } catch (err: any) {
+    } catch (err: Error | unknown) {
       setResendStatus('error');
-      setResendMessage(err.error || err.message || 'Failed to send verification email.');
+      const error = err instanceof Error ? err : new Error('Failed to send verification email');
+      setResendMessage(error.message);
     }
   };
 
@@ -236,7 +233,7 @@ export function LoginForm() {
           </div>
           <div className='text-center'>
             <span className='text-sm text-muted-foreground'>
-              Don't have an account?{' '}
+              Don&apos;t have an account?{' '}
               <Link
                 href='/auth/register'
                 className='font-medium text-primary hover:text-primary/80 transition-colors'

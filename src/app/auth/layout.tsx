@@ -36,7 +36,7 @@ export default function AuthLayout({
                   <span className="block text-primary">with Confidence</span>
                 </h1>
                 <p className="text-muted-foreground text-sm leading-relaxed">
-                  Join thousands of businesses keeping their websites healthy across Nigeria's digital landscape.
+                  Join thousands of businesses keeping their websites healthy across Nigeria&apos;s digital landscape.
                 </p>
               </div>
 

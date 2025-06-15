@@ -71,16 +71,12 @@ export function ForgotPasswordForm() {
       } else {
         setErrorMessage(response.message || 'Something went wrong. Please try again.');
       }
-    } catch (error: any) {
-      const err = error || {};
-      if (err.code) {
-        setErrorMessage(`${err.code}: ${err.error || err.message || 'An error occurred.'}`);
-      } else if (err.error) {
-        setErrorMessage(err.error);
-      } else if (err.message) {
-        setErrorMessage(err.message);
+    } catch (error: Error | unknown) {
+      const err = error instanceof Error ? error : new Error('An error occurred');
+      if ('code' in err) {
+        setErrorMessage(`${err.code}: ${err.message || 'An error occurred.'}`);
       } else {
-        setErrorMessage('An error occurred while processing your request.');
+        setErrorMessage(err.message || 'An error occurred while processing your request.');
       }
     } finally {
       setIsLoading(false);
@@ -101,7 +97,7 @@ export function ForgotPasswordForm() {
             Forgot Password
           </CardTitle>
           <CardDescription className='text-muted-foreground'>
-            Enter your email address and we'll send you instructions to reset your password
+            Enter your email address and we&apos;ll send you instructions to reset your password
           </CardDescription>
         </CardHeader>
 

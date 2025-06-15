@@ -86,16 +86,12 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
       } else {
         setErrorMessage(response.message || 'Something went wrong. Please try again.');
       }
-    } catch (error: any) {
-      const err = error || {};
-      if (err.code) {
-        setErrorMessage(`${err.code}: ${err.error || err.message || 'An error occurred.'}`);
-      } else if (err.error) {
-        setErrorMessage(err.error);
-      } else if (err.message) {
-        setErrorMessage(err.message);
+    } catch (error: Error | unknown) {
+      const err = error instanceof Error ? error : new Error('An error occurred');
+      if ('code' in err) {
+        setErrorMessage(`${err.code}: ${err.message || 'An error occurred.'}`);
       } else {
-        setErrorMessage('An error occurred while resetting your password.');
+        setErrorMessage(err.message || 'An error occurred while resetting your password.');
       }
     } finally {
       setIsLoading(false);

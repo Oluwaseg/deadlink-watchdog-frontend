@@ -29,7 +29,7 @@ interface AuthFormProps {
   title: string;
   fields: FormField[];
   submitText: string;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: Record<string, string>) => void;
   isLoading?: boolean;
   error?: string;
   success?: string;
@@ -112,11 +112,10 @@ export function AuthForm({
                         onChange={(e) =>
                           handleChange(field.name, e.target.value)
                         }
-                        className={`${
-                          errors[field.name]
+                        className={`${errors[field.name]
                             ? 'border-destructive focus-visible:ring-destructive'
                             : 'border-border focus-visible:ring-primary'
-                        }`}
+                          }`}
                         disabled={isLoading}
                       />
                       {errors[field.name] && (
@@ -150,11 +149,10 @@ export function AuthForm({
                     placeholder={field.placeholder}
                     value={formData[field.name] || ''}
                     onChange={(e) => handleChange(field.name, e.target.value)}
-                    className={`${
-                      errors[field.name]
+                    className={`${errors[field.name]
                         ? 'border-destructive focus-visible:ring-destructive'
                         : 'border-border focus-visible:ring-primary'
-                    }`}
+                      }`}
                     disabled={isLoading}
                   />
                   {errors[field.name] && (

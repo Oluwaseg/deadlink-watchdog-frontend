@@ -106,14 +106,13 @@ function OTPInput({
           className={`
             w-12 h-14 text-center text-xl font-bold rounded-lg border-2 transition-all duration-200
             focus:outline-none focus:ring-2 focus:ring-primary/20
-            ${
-              error
-                ? 'border-destructive bg-destructive/5 text-destructive'
-                : activeIndex === index
+            ${error
+              ? 'border-destructive bg-destructive/5 text-destructive'
+              : activeIndex === index
                 ? 'border-primary bg-primary/5 text-primary'
                 : value[index]
-                ? 'border-primary/60 bg-primary/5 text-foreground'
-                : 'border-border bg-background text-muted-foreground hover:border-primary/40'
+                  ? 'border-primary/60 bg-primary/5 text-foreground'
+                  : 'border-border bg-background text-muted-foreground hover:border-primary/40'
             }
             ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-text'}
           `}
@@ -194,8 +193,9 @@ export function VerifyEmailForm() {
       setSuccessMessage(
         'Verification email resent successfully! Please check your inbox.'
       );
-    } catch (error) {
-      setErrorMessage(error?.message || 'Failed to resend verification email.');
+    } catch (error: Error | unknown) {
+      const err = error instanceof Error ? error : new Error('Failed to resend verification email');
+      setErrorMessage(err.message);
     } finally {
       setIsResending(false);
     }

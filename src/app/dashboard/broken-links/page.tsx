@@ -30,14 +30,13 @@ import { useState } from 'react';
 export default function BrokenLinksPage() {
   const [page, setPage] = useState(1);
   const [errorType, setErrorType] = useState<string>('all');
-  const [isFixed, setIsFixed] = useState<boolean | undefined>(undefined);
   const [searchQuery, setSearchQuery] = useState('');
 
   const { data, isLoading, error, refetch } = useBrokenLinks(
     page,
     20,
     errorType === 'all' ? '' : errorType,
-    isFixed
+    undefined
   );
 
   const getErrorIcon = (errorType: string) => {

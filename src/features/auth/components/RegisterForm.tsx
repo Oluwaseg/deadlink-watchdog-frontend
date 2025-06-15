@@ -70,18 +70,12 @@ export function RegisterForm() {
             setErrorMessage(response.message || 'Request failed');
           }
         },
-        onError: (error) => {
-          const err = (error as any) || {};
-          if (err.code) {
-            setErrorMessage(
-              `${err.error || err.message || 'An error occurred.'}`
-            );
-          } else if (err.error) {
-            setErrorMessage(err.error);
-          } else if (err.message) {
-            setErrorMessage(err.message);
+        onError: (error: Error | unknown) => {
+          const err = error instanceof Error ? error : new Error('An error occurred');
+          if ('code' in err) {
+            setErrorMessage(err.message || 'An error occurred.');
           } else {
-            setErrorMessage('Request failed');
+            setErrorMessage(err.message || 'Request failed');
           }
         },
       });
