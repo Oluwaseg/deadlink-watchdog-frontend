@@ -179,7 +179,7 @@ export function VerifyEmailForm() {
           },
         }
       );
-    } catch (error) {
+    } catch {
       setErrorMessage('An error occurred during verification.');
     }
   };
