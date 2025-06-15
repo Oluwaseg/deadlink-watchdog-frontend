@@ -1,27 +1,27 @@
 export interface BrokenLink {
-    id: string;
-    url: string;
-    sourceUrl: string;
-    errorType: string;
-    statusCode: number;
-    createdAt: string;
+  id: string;
+  url: string;
+  sourceUrl: string;
+  errorType: string;
+  statusCode: number;
+  createdAt: string;
 }
 
 export interface ErrorSummary {
-    errorType: string;
-    count: number;
+  errorType: string;
+  count: number;
 }
 
 export interface Pagination {
-    total: number;
-    pages: number;
+  total: number;
+  pages: number;
 }
 
 export interface BrokenLinksResponse {
-    success: boolean;
-    data: {
-        summary: ErrorSummary[];
-        recentBrokenLinks: BrokenLink[];
-        pagination: Pagination;
-    };
+  success: boolean;
+  data: {
+    summary: ErrorSummary[];
+    recentBrokenLinks: BrokenLink[];
+    pagination: Pagination;
+  };
 }

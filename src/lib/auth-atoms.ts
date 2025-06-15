@@ -9,15 +9,9 @@ export interface AuthState {
   isAuthenticated: boolean;
 }
 
-// Persistent atoms (stored in localStorage)
-export const accessTokenAtom = atomWithStorage<string | null>(
-  'accessToken',
-  null
-);
-export const refreshTokenAtom = atomWithStorage<string | null>(
-  'refreshToken',
-  null
-);
+// Regular atoms for tokens (not persisted to localStorage)
+export const accessTokenAtom = atom<string | null>(null);
+export const refreshTokenAtom = atom<string | null>(null);
 export const userAtom = atomWithStorage<User | null>('user', null);
 
 // Derived atom for authentication status
@@ -58,10 +52,24 @@ export const loginAtom = atom(
 );
 
 export const logoutAtom = atom(null, (get, set) => {
+  // Clear Jotai atoms
   set(userAtom, null);
   set(accessTokenAtom, null);
   set(refreshTokenAtom, null);
-  // Clear any other user-related data
+
+  // Clear localStorage items
+  localStorage.removeItem('user');
+  localStorage.removeItem('accessToken-deadlink-watchdog');
+  localStorage.removeItem('refreshToken-deadlink-watchdog');
+
+  // Clear cookies
+  document.cookie =
+    'accessToken-deadlink-watchdog=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+  document.cookie =
+    'refreshToken-deadlink-watchdog=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+
+  // Clear any other related items
+  localStorage.removeItem('auth-state');
 });
 
 export const updateUserAtom = atom(null, (get, set, user: User) => {

@@ -10,9 +10,8 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { AlertCircle, ArrowLeft, CheckCircle, Mail } from 'lucide-react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useResendVerification, useVerifyEmail } from '../hooks/useAuth';
 
 // OTP Input Component
@@ -126,204 +125,172 @@ function OTPInput({
 
 export function VerifyEmailForm() {
   const router = useRouter();
-  const verifyMutation = useVerifyEmail();
-  const resendMutation = useResendVerification();
-  const [email, setEmail] = React.useState<string | null>(null);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [otpValue, setOtpValue] = React.useState('');
-  const [otpError, setOtpError] = React.useState('');
+  const verifyEmailMutation = useVerifyEmail();
+  const resendVerificationMutation = useResendVerification();
+  const [code, setCode] = useState('');
+  const [email, setEmail] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [isResending, setIsResending] = useState(false);
 
-  // Get email from localStorage on mount
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const storedEmail = localStorage.getItem('pendingVerificationEmail');
+  // Effect to check for stored email from both registration and login flows
+  useEffect(() => {
+    const storedEmail =
+      localStorage.getItem('pending_verification_email') ||
+      localStorage.getItem('pendingVerificationEmail');
+
+    if (storedEmail) {
       setEmail(storedEmail);
-      setIsLoading(false);
-
-      if (!storedEmail) {
-        router.push('/auth/register');
-      }
+      // Don't remove the email immediately, wait for successful verification
+      // We'll clean it up after verification succeeds
     }
-  }, [router]);
+  }, []); // Remove router dependency
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage('');
+    setSuccessMessage('');
 
-    if (!email) return;
-
-    if (otpValue.length !== 6) {
-      setOtpError('Please enter the complete 6-digit code');
+    if (!email || !code) {
+      setErrorMessage('Please provide both email and verification code.');
       return;
     }
 
-    setOtpError('');
-    verifyMutation.mutate(
-      { email, code: otpValue },
-      {
-        onSuccess: () => {
-          localStorage.removeItem('pendingVerificationEmail');
-          router.push('/dashboard');
-        },
-        onError: (error) => {
-          console.error('Verification failed:', error);
-          setOtpError('Invalid verification code. Please try again.');
-        },
-      }
-    );
+    try {
+      verifyEmailMutation.mutate(
+        { email, code },
+        {
+          onSuccess: (response) => {
+            if (response.success) {
+              setSuccessMessage(
+                'Email verified successfully! Redirecting to dashboard...'
+              );
+              // Clean up stored emails only after successful verification
+              localStorage.removeItem('pending_verification_email');
+              localStorage.removeItem('pendingVerificationEmail');
+              // The useVerifyEmail hook will handle cookies and navigation
+            } else {
+              setErrorMessage(response.message || 'Verification failed');
+            }
+          },
+          onError: (error) => {
+            setErrorMessage(
+              error?.message || 'Failed to verify email. Please try again.'
+            );
+          },
+        }
+      );
+    } catch (error) {
+      setErrorMessage('An error occurred during verification.');
+    }
   };
 
-  const handleResend = () => {
-    if (email) {
-      resendMutation.mutate({ email });
+  const handleResend = async () => {
+    setIsResending(true);
+    setErrorMessage('');
+
+    try {
+      await resendVerificationMutation.mutateAsync({ email });
+      setSuccessMessage(
+        'Verification email resent successfully! Please check your inbox.'
+      );
+    } catch (error) {
+      setErrorMessage(error?.message || 'Failed to resend verification email.');
+    } finally {
+      setIsResending(false);
     }
+  };
+
+  const handleBackToLogin = () => {
+    // Clean up stored emails when manually going back to login
+    localStorage.removeItem('pending_verification_email');
+    localStorage.removeItem('pendingVerificationEmail');
+    router.push('/auth/login');
   };
 
   const handleOtpChange = (value: string) => {
-    setOtpValue(value);
-    if (otpError) {
-      setOtpError('');
+    setCode(value);
+    if (errorMessage) {
+      setErrorMessage('');
     }
   };
-
-  // Show loading while checking for email
-  if (isLoading) {
-    return (
-      <div className='w-full max-w-md mx-auto text-center'>
-        <div className='flex items-center justify-center space-x-2'>
-          <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
-          <p className='text-muted-foreground'>Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Show redirecting message if no email
-  if (!email) {
-    return (
-      <div className='w-full max-w-md mx-auto text-center'>
-        <p className='text-muted-foreground'>
-          No verification email found. Redirecting to registration...
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className='w-full'>
       <Card className='border-0 shadow-none lg:shadow-lg lg:border'>
         <CardHeader className='space-y-1 text-center pb-6'>
-          <div className='mx-auto mb-4 h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center'>
-            <Mail className='h-8 w-8 text-primary' />
-          </div>
           <CardTitle className='text-2xl font-bold text-foreground'>
             Verify Your Email
           </CardTitle>
           <CardDescription className='text-muted-foreground'>
-            We sent a 6-digit verification code to
-            <br />
-            <span className='font-semibold text-foreground'>{email}</span>
+            {email ? (
+              <>
+                We sent a verification code to <strong>{email}</strong>
+              </>
+            ) : (
+              'Enter your verification code'
+            )}
           </CardDescription>
         </CardHeader>
 
         <CardContent className='space-y-6'>
-          <form onSubmit={handleSubmit} className='space-y-6'>
+          <form onSubmit={handleVerify} className='space-y-4'>
             <div className='space-y-4'>
-              <div className='text-center'>
-                <label className='text-sm font-medium text-foreground mb-4 block'>
-                  Enter verification code
-                </label>
-                <OTPInput
-                  length={6}
-                  value={otpValue}
-                  onChange={handleOtpChange}
-                  disabled={verifyMutation.isPending}
-                  error={!!otpError || !!verifyMutation.error}
-                />
-                {otpError && (
-                  <p className='mt-2 text-sm text-destructive flex items-center justify-center gap-1'>
-                    <AlertCircle className='h-3 w-3' />
-                    {otpError}
-                  </p>
-                )}
-              </div>
+              <OTPInput
+                length={6}
+                value={code}
+                onChange={setCode}
+                disabled={verifyEmailMutation.isPending}
+              />
+
+              {errorMessage && (
+                <Alert variant='destructive'>
+                  <AlertCircle className='h-4 w-4' />
+                  <AlertDescription>{errorMessage}</AlertDescription>
+                </Alert>
+              )}
+
+              {successMessage && (
+                <Alert className='border-green-500 text-green-500'>
+                  <CheckCircle className='h-4 w-4' />
+                  <AlertDescription>{successMessage}</AlertDescription>
+                </Alert>
+              )}
             </div>
 
-            <Button
-              type='submit'
-              disabled={verifyMutation.isPending || otpValue.length !== 6}
-              className='w-full bg-primary hover:bg-primary/90 text-primary-foreground'
-              size='lg'
-            >
-              {verifyMutation.isPending ? (
-                <div className='flex items-center gap-2'>
-                  <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent'></div>
-                  Verifying...
-                </div>
-              ) : (
-                'Verify Email'
-              )}
-            </Button>
+            <div className='space-y-2'>
+              <Button
+                type='submit'
+                className='w-full'
+                disabled={!code || verifyEmailMutation.isPending}
+              >
+                {verifyEmailMutation.isPending && (
+                  <Mail className='mr-2 h-4 w-4 animate-spin' />
+                )}
+                Verify Email
+              </Button>
 
-            {verifyMutation.error && (
-              <Alert variant='destructive'>
-                <AlertCircle className='h-4 w-4' />
-                <AlertDescription>
-                  {verifyMutation.error.message}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {verifyMutation.isSuccess && (
-              <Alert className='border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200'>
-                <CheckCircle className='h-4 w-4 text-green-600 dark:text-green-400' />
-                <AlertDescription className='text-green-800 dark:text-green-200'>
-                  Email verified successfully! Redirecting...
-                </AlertDescription>
-              </Alert>
-            )}
-          </form>
-
-          {/* Resend Section */}
-          <div className='pt-4 border-t border-border space-y-4'>
-            <div className='text-center'>
-              <p className='text-sm text-muted-foreground mb-3'>
-                Didn&apos;t receive the code?
-              </p>
               <Button
                 type='button'
                 variant='outline'
-                size='sm'
+                className='w-full'
                 onClick={handleResend}
-                disabled={resendMutation.isPending}
-                className='border-primary/20 text-primary hover:bg-primary/5'
+                disabled={isResending || !email}
               >
-                {resendMutation.isPending ? (
-                  <div className='flex items-center gap-2'>
-                    <div className='h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
-                    Sending...
-                  </div>
-                ) : (
-                  'Resend Code'
-                )}
+                {isResending && <Mail className='mr-2 h-4 w-4 animate-spin' />}
+                Resend Verification Code
               </Button>
-              {resendMutation.isSuccess && (
-                <p className='text-sm text-green-600 dark:text-green-400 mt-2 flex items-center justify-center gap-1'>
-                  <CheckCircle className='h-3 w-3' />
-                  New code sent to {email}!
-                </p>
-              )}
-            </div>
 
-            <div className='text-center'>
-              <Link
-                href='/auth/login'
-                className='inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors'
+              <Button
+                variant='ghost'
+                className='w-full'
+                onClick={handleBackToLogin}
               >
-                <ArrowLeft className='h-3 w-3' />
-                Back to Sign In
-              </Link>
+                <ArrowLeft className='mr-2 h-4 w-4' />
+                Back to Login
+              </Button>
             </div>
-          </div>
+          </form>
         </CardContent>
       </Card>
     </div>

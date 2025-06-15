@@ -16,9 +16,14 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
+import { useAuthState } from '@/features/auth/hooks/useAuth';
+import { loginAtom } from '@/lib/auth-atoms';
+import { getCookie } from '@/lib/cookie-utils';
+import { useSetAtom } from 'jotai';
 import { Activity, Bell } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
+import { useEffect, useState } from 'react';
 
 // Helper function to generate breadcrumbs from pathname
 function generateBreadcrumbs(pathname: string) {
@@ -50,7 +55,59 @@ function generateBreadcrumbs(pathname: string) {
 }
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
+  const { isAuthenticated } = useAuthState();
+  const login = useSetAtom(loginAtom);
+  const router = useRouter();
   const pathname = usePathname();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuthAndCookies = async () => {
+      // If not authenticated, check cookies
+      if (!isAuthenticated) {
+        const accessToken = getCookie('accessToken-deadlink-watchdog');
+        const refreshToken = getCookie('refreshToken-deadlink-watchdog');
+        const userJson = localStorage.getItem('user');
+
+        if (accessToken && refreshToken && userJson) {
+          try {
+            const user = JSON.parse(userJson);
+            // Restore auth state from cookies
+            login({
+              user,
+              accessToken,
+              refreshToken,
+            });
+            setIsLoading(false);
+            return;
+          } catch (e) {
+            console.error('Failed to parse user data:', e);
+          }
+        }
+        // No valid auth data found, redirect to login
+        await router.replace('/auth/login');
+      }
+      setIsLoading(false);
+    };
+
+    checkAuthAndCookies();
+  }, [isAuthenticated, router, login]);
+
+  // Show loading state instead of blank page
+  if (isLoading) {
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        <div className='animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full' />
+      </div>
+    );
+  }
+
+  // If not authenticated after checking cookies, don't render anything
+  if (!isAuthenticated) {
+    return null;
+  }
+
+  // Generate breadcrumbs from pathname
   const breadcrumbs = generateBreadcrumbs(pathname);
 
   return (

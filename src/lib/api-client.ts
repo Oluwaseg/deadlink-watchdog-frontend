@@ -16,8 +16,6 @@ export interface RefreshTokenResponse {
 
 export class ApiClient {
   private baseURL: string;
-  private getToken: () => string | null;
-  private getRefreshToken: () => string | null;
   private onTokenRefresh?: (newTokens: {
     accessToken: string;
     refreshToken: string;
@@ -25,11 +23,11 @@ export class ApiClient {
   private onAuthError?: () => void;
   private isRefreshing = false;
   private refreshPromise: Promise<RefreshTokenResponse> | null = null;
+  private tokenCookieName = 'accessToken-deadlink-watchdog';
+  private refreshTokenCookieName = 'refreshToken-deadlink-watchdog';
 
   constructor(options: ApiClientOptions) {
     this.baseURL = options.baseURL || '';
-    this.getToken = options.getToken || (() => null);
-    this.getRefreshToken = options.getRefreshToken || (() => null);
     this.onTokenRefresh = options.onTokenRefresh;
     this.onAuthError = options.onAuthError;
   }
@@ -46,6 +44,7 @@ export class ApiClient {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ refreshToken }),
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -57,6 +56,20 @@ export class ApiClient {
       accessToken: data.accessToken,
       refreshToken: data.refreshToken,
     };
+  }
+
+  private getToken(): string | null {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${this.tokenCookieName}=`);
+    if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+    return null;
+  }
+
+  private getRefreshToken(): string | null {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${this.refreshTokenCookieName}=`);
+    if (parts.length === 2) return parts.pop()?.split(';').shift() || null;
+    return null;
   }
 
   async request<T = unknown>(
@@ -81,6 +94,7 @@ export class ApiClient {
     let response = await fetch(url, {
       ...options,
       headers,
+      credentials: 'include',
     });
 
     // Handle 401 - try to refresh token
@@ -99,6 +113,7 @@ export class ApiClient {
         response = await fetch(url, {
           ...options,
           headers,
+          credentials: 'include',
         });
 
         this.isRefreshing = false;

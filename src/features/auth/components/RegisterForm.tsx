@@ -63,19 +63,19 @@ export function RegisterForm() {
       registerMutation.mutate(formData, {
         onSuccess: (response) => {
           if (response.success) {
-            setSuccessMessage('Account created successfully! Please check your email to verify your account.');
-            setTimeout(() => {
-              setIsNavigating(true);
-              router.push('/auth/verify-email');
-            }, 2000);
+            setSuccessMessage(
+              'Account created successfully! Redirecting to verification page...'
+            );
           } else {
             setErrorMessage(response.message || 'Request failed');
           }
         },
         onError: (error) => {
-          const err = error as any || {};
+          const err = (error as any) || {};
           if (err.code) {
-            setErrorMessage(`${err.error || err.message || 'An error occurred.'}`);
+            setErrorMessage(
+              `${err.error || err.message || 'An error occurred.'}`
+            );
           } else if (err.error) {
             setErrorMessage(err.error);
           } else if (err.message) {
@@ -83,7 +83,7 @@ export function RegisterForm() {
           } else {
             setErrorMessage('Request failed');
           }
-        }
+        },
       });
     } catch (error) {
       setErrorMessage('An error occurred while creating your account.');
