@@ -208,13 +208,6 @@ export function VerifyEmailForm() {
     router.push('/auth/login');
   };
 
-  const handleOtpChange = (value: string) => {
-    setCode(value);
-    if (errorMessage) {
-      setErrorMessage('');
-    }
-  };
-
   return (
     <div className='w-full'>
       <Card className='border-0 shadow-none lg:shadow-lg lg:border'>

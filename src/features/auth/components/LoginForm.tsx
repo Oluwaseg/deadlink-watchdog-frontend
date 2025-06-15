@@ -111,12 +111,6 @@ export function LoginForm() {
     }
   };
 
-  const handleBackToLogin = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsNavigating(true);
-    router.push('/auth/login');
-  };
-
   return (
     <div className='w-full'>
       <Card className='border-0 shadow-none lg:shadow-lg lg:border'>

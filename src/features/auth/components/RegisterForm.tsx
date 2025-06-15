@@ -79,7 +79,7 @@ export function RegisterForm() {
           }
         },
       });
-    } catch (error) {
+    } catch {
       setErrorMessage('An error occurred while creating your account.');
     }
   };
