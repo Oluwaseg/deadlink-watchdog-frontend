@@ -1,5 +1,7 @@
 'use client';
 
+import type React from 'react';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -59,29 +61,28 @@ export function RegisterForm() {
       return;
     }
 
-    try {
-      registerMutation.mutate(formData, {
-        onSuccess: (response) => {
-          if (response.success) {
-            setSuccessMessage(
-              'Account created successfully! Redirecting to verification page...'
-            );
-          } else {
-            setErrorMessage(response.message || 'Request failed');
-          }
-        },
-        onError: (error: Error | unknown) => {
-          const err = error instanceof Error ? error : new Error('An error occurred');
-          if ('code' in err) {
-            setErrorMessage(err.message || 'An error occurred.');
-          } else {
-            setErrorMessage(err.message || 'Request failed');
-          }
-        },
-      });
-    } catch {
-      setErrorMessage('An error occurred while creating your account.');
-    }
+    registerMutation.mutate(formData, {
+      onSuccess: (response) => {
+        // Success is handled here
+        if (response.success) {
+          setSuccessMessage(
+            'Account created successfully! Redirecting to verification page...'
+          );
+        } else {
+          setErrorMessage(response.message || 'Request failed');
+        }
+      },
+      onError: (error: Error | unknown) => {
+        // Error is handled here
+        const err =
+          error instanceof Error ? error : new Error('An error occurred');
+        if ('code' in err) {
+          setErrorMessage(err.message || 'An error occurred.');
+        } else {
+          setErrorMessage(err.message || 'Request failed');
+        }
+      },
+    });
   };
 
   const handleBackToLogin = (e: React.MouseEvent) => {

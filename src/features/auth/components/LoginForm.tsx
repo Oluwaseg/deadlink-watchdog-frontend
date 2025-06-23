@@ -1,5 +1,7 @@
 'use client';
 
+import type React from 'react';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,7 +31,9 @@ export function LoginForm() {
   const [isNavigating, setIsNavigating] = useState(false);
   const [emailNotVerified, setEmailNotVerified] = useState(false);
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
-  const [resendStatus, setResendStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [resendStatus, setResendStatus] = useState<
+    'idle' | 'loading' | 'success' | 'error'
+  >('idle');
   const [resendMessage, setResendMessage] = useState('');
 
   const handleChange = (name: string, value: string) => {
@@ -59,31 +63,32 @@ export function LoginForm() {
       return;
     }
 
-    try {
-      setIsLoading(true);
-      loginMutation.mutate(formData, {
-        onSuccess: (response) => {
-          if (response.success) {
-            setIsNavigating(true);
-            router.push('/dashboard');
-          } else {
-            setErrorMessage(response.message || 'Request failed');
-          }
-        },
-        onError: (error: Error | unknown) => {
-          const err = error instanceof Error ? error : new Error('An error occurred');
-          if ('code' in err && err.code === 'EMAIL_NOT_VERIFIED') {
-            setEmailNotVerified(true);
-            setUnverifiedEmail(formData.email);
-            setErrorMessage(err.message || 'Please verify your email before logging in.');
-          } else {
-            setErrorMessage(err.message || 'Request failed');
-          }
+    setIsLoading(true);
+    loginMutation.mutate(formData, {
+      onSuccess: (response) => {
+        setIsLoading(false);
+        if (response.success) {
+          setIsNavigating(true);
+          router.push('/dashboard');
+        } else {
+          setErrorMessage(response.message || 'Request failed');
         }
-      });
-    } finally {
-      setIsLoading(false);
-    }
+      },
+      onError: (error: Error | unknown) => {
+        setIsLoading(false);
+        const err =
+          error instanceof Error ? error : new Error('An error occurred');
+        if ('code' in err && err.code === 'EMAIL_NOT_VERIFIED') {
+          setEmailNotVerified(true);
+          setUnverifiedEmail(formData.email);
+          setErrorMessage(
+            err.message || 'Please verify your email before logging in.'
+          );
+        } else {
+          setErrorMessage(err.message || 'Request failed');
+        }
+      },
+    });
   };
 
   const handleResendVerification = async () => {
@@ -93,7 +98,9 @@ export function LoginForm() {
       const res = await resendVerification({ email: unverifiedEmail });
       if (res.success) {
         setResendStatus('success');
-        setResendMessage(res.message || 'Verification email sent! Please check your inbox.');
+        setResendMessage(
+          res.message || 'Verification email sent! Please check your inbox.'
+        );
         // Store email for the verify page
         localStorage.setItem('pendingVerificationEmail', unverifiedEmail);
         // Redirect after a short delay
@@ -106,7 +113,10 @@ export function LoginForm() {
       }
     } catch (err: Error | unknown) {
       setResendStatus('error');
-      const error = err instanceof Error ? err : new Error('Failed to send verification email');
+      const error =
+        err instanceof Error
+          ? err
+          : new Error('Failed to send verification email');
       setResendMessage(error.message);
     }
   };
@@ -115,7 +125,9 @@ export function LoginForm() {
     <div className='w-full'>
       <Card className='border-0 shadow-none lg:shadow-lg lg:border'>
         <CardHeader className='space-y-1 text-center pb-6'>
-          <CardTitle className='text-2xl font-bold text-foreground'>Sign In</CardTitle>
+          <CardTitle className='text-2xl font-bold text-foreground'>
+            Sign In
+          </CardTitle>
           <CardDescription className='text-muted-foreground'>
             Enter your credentials to access your account
           </CardDescription>
@@ -180,20 +192,25 @@ export function LoginForm() {
                   )}
                 </Button>
                 {resendStatus === 'success' && (
-                  <span className='text-green-600 text-sm'>{resendMessage}</span>
+                  <span className='text-green-600 text-sm'>
+                    {resendMessage}
+                  </span>
                 )}
                 {resendStatus === 'error' && (
-                  <span className='text-destructive text-sm'>{resendMessage}</span>
+                  <span className='text-destructive text-sm'>
+                    {resendMessage}
+                  </span>
                 )}
               </Alert>
             )}
 
-            {errorMessage && (!emailNotVerified || resendStatus === 'error') && (
-              <Alert variant='destructive'>
-                <AlertCircle className='h-4 w-4' />
-                <AlertDescription>{errorMessage}</AlertDescription>
-              </Alert>
-            )}
+            {errorMessage &&
+              (!emailNotVerified || resendStatus === 'error') && (
+                <Alert variant='destructive'>
+                  <AlertCircle className='h-4 w-4' />
+                  <AlertDescription>{errorMessage}</AlertDescription>
+                </Alert>
+              )}
 
             <Button
               type='submit'
