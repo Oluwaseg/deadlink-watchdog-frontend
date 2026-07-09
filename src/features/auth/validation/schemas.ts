@@ -1,14 +1,18 @@
 import { z } from 'zod';
 
+type ValidationResult<T extends z.ZodTypeAny> =
+  | { isValid: true; errors: {}; data: z.infer<T> }
+  | { isValid: false; errors: Record<string, string>; data: null };
+
 export const validateData = <T extends z.ZodTypeAny>(
   schema: T,
   data: unknown
-) => {
+): ValidationResult<T> => {
   const result = schema.safeParse(data);
 
   if (!result.success) {
     const errors: Record<string, string> = {};
-    result.error.errors.forEach((issue) => {
+    result.error.issues.forEach((issue) => {
       const key = issue.path.join('.');
       errors[key] = issue.message;
     });
@@ -60,13 +64,13 @@ export const forgotPasswordSchema = z.object({
 
 // Reset password schema
 export const resetPasswordSchema = z.object({
-  token: z.string({ required_error: 'Reset token is required' }),
+  token: z.string().min(1, 'Reset token is required'),
   newPassword: passwordSchema,
 });
 
 // Change password schema
 export const changePasswordSchema = z.object({
-  currentPassword: z.string({ required_error: 'Current password is required' }),
+  currentPassword: z.string().min(1, 'Current password is required'),
   newPassword: passwordSchema,
 });
 

@@ -37,7 +37,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
   const [formData, setFormData] = useState<ResetPasswordFormData>({
     newPassword: '',
     confirmPassword: '',
-    token
+    token,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -58,7 +58,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
     const validation = resetPasswordSchema.safeParse(formData);
     if (!validation.success) {
       const formattedErrors: Record<string, string> = {};
-      validation.error.errors.forEach((err) => {
+      validation.error.issues.forEach((err) => {
         if (err.path[0]) {
           formattedErrors[err.path[0].toString()] = err.message;
         }
@@ -74,24 +74,31 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
       const response = await resetPassword({
         ...formData,
-        token
+        token,
       });
 
       if (response.success) {
-        setSuccessMessage('Password reset successfully! Redirecting to sign in...');
+        setSuccessMessage(
+          'Password reset successfully! Redirecting to sign in...'
+        );
         setTimeout(() => {
           setIsNavigating(true);
           router.push('/auth/login');
         }, 1500);
       } else {
-        setErrorMessage(response.message || 'Something went wrong. Please try again.');
+        setErrorMessage(
+          response.message || 'Something went wrong. Please try again.'
+        );
       }
     } catch (error: Error | unknown) {
-      const err = error instanceof Error ? error : new Error('An error occurred');
+      const err =
+        error instanceof Error ? error : new Error('An error occurred');
       if ('code' in err) {
         setErrorMessage(`${err.code}: ${err.message || 'An error occurred.'}`);
       } else {
-        setErrorMessage(err.message || 'An error occurred while resetting your password.');
+        setErrorMessage(
+          err.message || 'An error occurred while resetting your password.'
+        );
       }
     } finally {
       setIsLoading(false);
@@ -112,7 +119,8 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
             <Alert variant='destructive'>
               <AlertCircle className='h-4 w-4' />
               <AlertDescription>
-                Invalid or missing reset token. Please request a new password reset link.
+                Invalid or missing reset token. Please request a new password
+                reset link.
               </AlertDescription>
             </Alert>
             <div className='mt-4 text-center'>
@@ -180,7 +188,9 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
                 type='password'
                 placeholder='••••••••'
                 value={formData.confirmPassword}
-                onChange={(e) => handleChange('confirmPassword', e.target.value)}
+                onChange={(e) =>
+                  handleChange('confirmPassword', e.target.value)
+                }
                 className={errors.confirmPassword ? 'border-destructive' : ''}
                 disabled={isLoading || isNavigating}
               />

@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { AlertCircle, CheckCircle } from 'lucide-react';
 import { useState } from 'react';
 import type { ZodTypeAny } from 'zod';
+import { z } from 'zod';
 import { validateData } from '../validation/schemas';
 
 interface FormField {
@@ -25,19 +26,19 @@ interface FormField {
   label: string;
 }
 
-interface AuthFormProps {
+interface AuthFormProps<T extends ZodTypeAny = ZodTypeAny> {
   title: string;
   fields: FormField[];
   submitText: string;
-  onSubmit: (data: Record<string, string>) => void;
+  onSubmit: (data: z.infer<T>) => void;
   isLoading?: boolean;
   error?: string;
   success?: string;
-  validationSchema: ZodTypeAny;
+  validationSchema: T;
   footer?: React.ReactNode;
 }
 
-export function AuthForm({
+export function AuthForm<T extends ZodTypeAny = ZodTypeAny>({
   title,
   fields,
   submitText,
@@ -47,7 +48,7 @@ export function AuthForm({
   success,
   validationSchema,
   footer,
-}: AuthFormProps) {
+}: AuthFormProps<T>) {
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -112,10 +113,11 @@ export function AuthForm({
                         onChange={(e) =>
                           handleChange(field.name, e.target.value)
                         }
-                        className={`${errors[field.name]
+                        className={`${
+                          errors[field.name]
                             ? 'border-destructive focus-visible:ring-destructive'
                             : 'border-border focus-visible:ring-primary'
-                          }`}
+                        }`}
                         disabled={isLoading}
                       />
                       {errors[field.name] && (
@@ -149,10 +151,11 @@ export function AuthForm({
                     placeholder={field.placeholder}
                     value={formData[field.name] || ''}
                     onChange={(e) => handleChange(field.name, e.target.value)}
-                    className={`${errors[field.name]
+                    className={`${
+                      errors[field.name]
                         ? 'border-destructive focus-visible:ring-destructive'
                         : 'border-border focus-visible:ring-primary'
-                      }`}
+                    }`}
                     disabled={isLoading}
                   />
                   {errors[field.name] && (

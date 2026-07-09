@@ -50,7 +50,7 @@ export function ForgotPasswordForm() {
     const validation = forgotPasswordSchema.safeParse(formData);
     if (!validation.success) {
       const formattedErrors: Record<string, string> = {};
-      validation.error.errors.forEach((err) => {
+      validation.error.issues.forEach((err) => {
         if (err.path[0]) {
           formattedErrors[err.path[0].toString()] = err.message;
         }
@@ -67,16 +67,23 @@ export function ForgotPasswordForm() {
       const response = await forgotPassword(formData);
 
       if (response.success) {
-        setSuccessMessage('Reset password instructions have been sent to your email.');
+        setSuccessMessage(
+          'Reset password instructions have been sent to your email.'
+        );
       } else {
-        setErrorMessage(response.message || 'Something went wrong. Please try again.');
+        setErrorMessage(
+          response.message || 'Something went wrong. Please try again.'
+        );
       }
     } catch (error: Error | unknown) {
-      const err = error instanceof Error ? error : new Error('An error occurred');
+      const err =
+        error instanceof Error ? error : new Error('An error occurred');
       if ('code' in err) {
         setErrorMessage(`${err.code}: ${err.message || 'An error occurred.'}`);
       } else {
-        setErrorMessage(err.message || 'An error occurred while processing your request.');
+        setErrorMessage(
+          err.message || 'An error occurred while processing your request.'
+        );
       }
     } finally {
       setIsLoading(false);
@@ -97,7 +104,8 @@ export function ForgotPasswordForm() {
             Forgot Password
           </CardTitle>
           <CardDescription className='text-muted-foreground'>
-            Enter your email address and we&apos;ll send you instructions to reset your password
+            Enter your email address and we&apos;ll send you instructions to
+            reset your password
           </CardDescription>
         </CardHeader>
 
