@@ -1,5 +1,6 @@
 'use client';
 import { AccessibilityButton } from '@/components/public/site/AccessibilityButton';
+import { CookieConsent } from '@/components/public/site/CookieConsent';
 import { Footer } from '@/components/public/site/Footer';
 import { Navbar } from '@/components/public/site/Navbar';
 import { useAuthState } from '@/features/auth/hooks/useAuth';
@@ -24,6 +25,7 @@ export default function PublicLayout({
       <main className='flex-1'>{children}</main>
       <Footer />
       <AccessibilityButton />
+      <CookieConsent />
     </div>
   );
 }

@@ -18,12 +18,14 @@ const nav = {
   Resources: [
     { label: 'How it works', scrollId: 'how-it-works' },
     { label: 'Health score', scrollId: 'how-it-works' },
-    { label: 'Changelog', href: '#' },
+    { label: 'Changelog', href: '/changelog' },
   ],
   Company: [
     { label: 'Support', scrollId: 'support' },
+    // { label: 'Support', href: '/support' },
     { label: 'Contact', href: 'mailto:hello@deadlinkwatchdog.com' },
-    { label: 'Status', href: '#' },
+    { label: 'Status', href: '/status' },
+    { label: 'Cookie preferences', href: '/cookies' },
   ],
 };
 
@@ -163,10 +165,10 @@ export function Footer() {
               </span>
               All systems operational
             </span>
-            <a href='#' className='hover:text-foreground'>
+            <a href='/privacy' className='hover:text-foreground'>
               Privacy
             </a>
-            <a href='#' className='hover:text-foreground'>
+            <a href='/terms' className='hover:text-foreground'>
               Terms
             </a>
           </div>
