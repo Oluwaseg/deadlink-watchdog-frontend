@@ -4,16 +4,17 @@ import type React from 'react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertCircle, Loader2, MailCheck } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import {
+  AlertCircle,
+  CheckCircle2,
+  Eye,
+  EyeOff,
+  Loader2,
+  MailCheck,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -29,6 +30,7 @@ export function LoginForm() {
   const [errorMessage, setErrorMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [emailNotVerified, setEmailNotVerified] = useState(false);
   const [unverifiedEmail, setUnverifiedEmail] = useState('');
   const [resendStatus, setResendStatus] = useState<
@@ -50,7 +52,6 @@ export function LoginForm() {
     setResendStatus('idle');
     setResendMessage('');
 
-    // Validate form data
     const validation = loginSchema.safeParse(formData);
     if (!validation.success) {
       const formattedErrors: Record<string, string> = {};
@@ -101,9 +102,7 @@ export function LoginForm() {
         setResendMessage(
           res.message || 'Verification email sent! Please check your inbox.'
         );
-        // Store email for the verify page
         localStorage.setItem('pendingVerificationEmail', unverifiedEmail);
-        // Redirect after a short delay
         setTimeout(() => {
           router.push('/auth/verify-email');
         }, 1200);
@@ -121,140 +120,197 @@ export function LoginForm() {
     }
   };
 
+  const isBusy = isLoading || isNavigating;
+
   return (
-    <div className='w-full'>
-      <Card className='border-0 shadow-none lg:shadow-lg lg:border'>
-        <CardHeader className='space-y-1 text-center pb-6'>
-          <CardTitle className='text-2xl font-bold text-foreground'>
-            Sign In
-          </CardTitle>
-          <CardDescription className='text-muted-foreground'>
-            Enter your credentials to access your account
-          </CardDescription>
-        </CardHeader>
-        <CardContent className='space-y-6'>
-          <form onSubmit={handleSubmit} className='space-y-4'>
-            <div className='space-y-2'>
-              <Label htmlFor='email'>Email</Label>
-              <Input
-                id='email'
-                type='email'
-                placeholder='name@example.com'
-                value={formData.email}
-                onChange={(e) => handleChange('email', e.target.value)}
-                className={errors.email ? 'border-destructive' : ''}
-                disabled={isLoading || isNavigating}
-              />
-              {errors.email && (
-                <p className='text-sm text-destructive flex items-center gap-1'>
-                  <AlertCircle className='h-3 w-3' />
-                  {errors.email}
-                </p>
-              )}
-            </div>
-            <div className='space-y-2'>
-              <Label htmlFor='password'>Password</Label>
-              <Input
-                id='password'
-                type='password'
-                placeholder='••••••••'
-                value={formData.password}
-                onChange={(e) => handleChange('password', e.target.value)}
-                className={errors.password ? 'border-destructive' : ''}
-                disabled={isLoading || isNavigating}
-              />
-              {errors.password && (
-                <p className='text-sm text-destructive flex items-center gap-1'>
-                  <AlertCircle className='h-3 w-3' />
-                  {errors.password}
-                </p>
-              )}
-            </div>
+    <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
+      <FieldGroup id='email' label='Email' error={errors.email}>
+        <Input
+          id='email'
+          type='email'
+          placeholder='you@company.com.ng'
+          autoComplete='email'
+          value={formData.email}
+          onChange={(e) => handleChange('email', e.target.value)}
+          className={cn(
+            'h-11 rounded-lg bg-background',
+            errors.email &&
+              'border-destructive focus-visible:ring-destructive/40'
+          )}
+          disabled={isBusy}
+        />
+      </FieldGroup>
 
-            {emailNotVerified && (
-              <Alert variant='destructive' className='flex flex-col gap-2'>
-                <MailCheck className='h-4 w-4 text-yellow-500' />
-                <AlertDescription>
-                  Please verify your email before logging in.
-                </AlertDescription>
-                <Button
-                  type='button'
-                  onClick={handleResendVerification}
-                  disabled={resendStatus === 'loading'}
-                  className='w-fit mt-2 bg-yellow-500 hover:bg-yellow-600 text-white'
-                >
-                  {resendStatus === 'loading' ? (
-                    <span className='flex items-center gap-2'>
-                      <Loader2 className='h-4 w-4 animate-spin' /> Sending...
-                    </span>
-                  ) : (
-                    'Resend Verification Email'
-                  )}
-                </Button>
-                {resendStatus === 'success' && (
-                  <span className='text-green-600 text-sm'>
-                    {resendMessage}
-                  </span>
-                )}
-                {resendStatus === 'error' && (
-                  <span className='text-destructive text-sm'>
-                    {resendMessage}
-                  </span>
-                )}
-              </Alert>
+      <FieldGroup
+        id='password'
+        label='Password'
+        error={errors.password}
+        rightSlot={
+          <Link
+            href='/auth/forgot-password'
+            className='font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-foreground'
+          >
+            Forgot?
+          </Link>
+        }
+      >
+        <div className='relative'>
+          <Input
+            id='password'
+            type={showPassword ? 'text' : 'password'}
+            placeholder='••••••••'
+            autoComplete='current-password'
+            value={formData.password}
+            onChange={(e) => handleChange('password', e.target.value)}
+            className={cn(
+              'h-11 rounded-lg bg-background pr-11',
+              errors.password &&
+                'border-destructive focus-visible:ring-destructive/40'
             )}
+            disabled={isBusy}
+          />
+          <button
+            type='button'
+            onClick={() => setShowPassword((v) => !v)}
+            disabled={isBusy}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+            className='absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+          >
+            {showPassword ? (
+              <EyeOff className='h-4 w-4' />
+            ) : (
+              <Eye className='h-4 w-4' />
+            )}
+          </button>
+        </div>
+      </FieldGroup>
 
-            {errorMessage &&
-              (!emailNotVerified || resendStatus === 'error') && (
-                <Alert variant='destructive'>
-                  <AlertCircle className='h-4 w-4' />
-                  <AlertDescription>{errorMessage}</AlertDescription>
-                </Alert>
-              )}
-
+      {emailNotVerified && (
+        <Alert className='border-warning/40 bg-warning/10'>
+          <MailCheck className='h-4 w-4 text-warning' />
+          <AlertDescription className='flex flex-col gap-3'>
+            <span>Please verify your email before logging in.</span>
             <Button
-              type='submit'
-              disabled={isLoading || isNavigating}
-              className='w-full bg-primary hover:bg-primary/90 text-primary-foreground'
-              size='lg'
+              type='button'
+              variant='outline'
+              size='sm'
+              onClick={handleResendVerification}
+              disabled={resendStatus === 'loading'}
+              className='w-fit'
             >
-              {isLoading ? (
-                <div className='flex items-center gap-2'>
-                  <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent'></div>
-                  Signing In...
-                </div>
-              ) : isNavigating ? (
-                <div className='flex items-center gap-2'>
-                  <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent'></div>
-                  Redirecting...
-                </div>
+              {resendStatus === 'loading' ? (
+                <span className='inline-flex items-center gap-2'>
+                  <Loader2 className='h-3.5 w-3.5 animate-spin' />
+                  Sending…
+                </span>
               ) : (
-                'Sign In'
+                'Resend verification email'
               )}
             </Button>
-          </form>
+            {resendStatus === 'success' && (
+              <span className='inline-flex items-center gap-1.5 text-[12px] text-success'>
+                <CheckCircle2 className='h-3.5 w-3.5' />
+                {resendMessage}
+              </span>
+            )}
+            {resendStatus === 'error' && (
+              <span className='inline-flex items-center gap-1.5 text-[12px] text-destructive'>
+                <AlertCircle className='h-3.5 w-3.5' />
+                {resendMessage}
+              </span>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
 
-          <div className='text-center'>
-            <Link
-              href='/auth/forgot-password'
-              className='text-sm font-medium text-primary hover:text-primary/80 transition-colors'
-            >
-              Forgot your password?
-            </Link>
-          </div>
-          <div className='text-center'>
-            <span className='text-sm text-muted-foreground'>
-              Don&apos;t have an account?{' '}
-              <Link
-                href='/auth/register'
-                className='font-medium text-primary hover:text-primary/80 transition-colors'
-              >
-                Sign up
-              </Link>
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+      {errorMessage && (!emailNotVerified || resendStatus === 'error') && (
+        <Alert
+          variant='destructive'
+          className='border-destructive/40 bg-destructive/5'
+        >
+          <AlertCircle className='h-4 w-4' />
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      )}
+
+      <Button
+        type='submit'
+        disabled={isBusy}
+        className='h-11 w-full rounded-lg text-[13px] font-semibold tracking-tight'
+      >
+        {isLoading ? (
+          <span className='inline-flex items-center gap-2'>
+            <Loader2 className='h-4 w-4 animate-spin' />
+            Signing in…
+          </span>
+        ) : isNavigating ? (
+          <span className='inline-flex items-center gap-2'>
+            <Loader2 className='h-4 w-4 animate-spin' />
+            Redirecting…
+          </span>
+        ) : (
+          'Sign in'
+        )}
+      </Button>
+
+      <div className='relative py-1'>
+        <div className='absolute inset-0 flex items-center'>
+          <span className='w-full border-t border-border/70' />
+        </div>
+        <div className='relative flex justify-center'>
+          <span className='bg-surface px-3 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground'>
+            new here
+          </span>
+        </div>
+      </div>
+
+      <Link
+        href='/auth/register'
+        className='inline-flex items-center justify-center gap-2 rounded-lg border border-border/70 bg-background/60 px-4 py-2.5 text-[13px] font-medium text-foreground transition-colors hover:border-border-strong hover:bg-muted/40'
+      >
+        Create an account
+      </Link>
+    </form>
+  );
+}
+
+function FieldGroup({
+  id,
+  label,
+  error,
+  hint,
+  rightSlot,
+  children,
+}: {
+  id: string;
+  label: string;
+  error?: string;
+  hint?: string;
+  rightSlot?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className='flex flex-col gap-1.5'>
+      <div className='flex items-baseline justify-between'>
+        <Label
+          htmlFor={id}
+          className='font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground'
+        >
+          {label}
+        </Label>
+        {rightSlot ? (
+          rightSlot
+        ) : hint && !error ? (
+          <span className='text-[10px] text-muted-foreground/70'>{hint}</span>
+        ) : null}
+      </div>
+      {children}
+      {error && (
+        <p className='inline-flex items-center gap-1 text-[11px] font-medium text-destructive'>
+          <AlertCircle className='h-3 w-3' />
+          {error}
+        </p>
+      )}
     </div>
   );
 }

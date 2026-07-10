@@ -1,17 +1,13 @@
 'use client';
 
+import type React from 'react';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { AlertCircle, ArrowLeft, CheckCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { AlertCircle, ArrowLeft, Loader2, MailCheck } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -46,7 +42,6 @@ export function ForgotPasswordForm() {
     setSuccessMessage('');
     setErrors({});
 
-    // Validate form data
     const validation = forgotPasswordSchema.safeParse(formData);
     if (!validation.success) {
       const formattedErrors: Record<string, string> = {};
@@ -96,99 +91,152 @@ export function ForgotPasswordForm() {
     router.push('/auth/login');
   };
 
+  const isBusy = isLoading || isNavigating;
+
   return (
-    <div className='w-full'>
-      <Card className='border-0 shadow-none lg:shadow-lg lg:border'>
-        <CardHeader className='space-y-1 text-center pb-6'>
-          <CardTitle className='text-2xl font-bold text-foreground'>
-            Forgot Password
-          </CardTitle>
-          <CardDescription className='text-muted-foreground'>
-            Enter your email address and we&apos;ll send you instructions to
-            reset your password
-          </CardDescription>
-        </CardHeader>
-
-        <CardContent className='space-y-6'>
-          <form onSubmit={handleSubmit} className='space-y-4'>
-            <div className='space-y-2'>
-              <Label htmlFor='email'>Email</Label>
-              <Input
-                id='email'
-                type='email'
-                placeholder='name@example.com'
-                value={formData.email}
-                onChange={(e) => handleChange('email', e.target.value)}
-                className={errors.email ? 'border-destructive' : ''}
-                disabled={isLoading || isNavigating}
-              />
-              {errors.email && (
-                <p className='text-sm text-destructive flex items-center gap-1'>
-                  <AlertCircle className='h-3 w-3' />
-                  {errors.email}
-                </p>
-              )}
-            </div>
-
-            {errorMessage && (
-              <Alert variant='destructive'>
-                <AlertCircle className='h-4 w-4' />
-                <AlertDescription>{errorMessage}</AlertDescription>
-              </Alert>
-            )}
-
-            {successMessage && (
-              <Alert className='border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200'>
-                <CheckCircle className='h-4 w-4 text-green-600 dark:text-green-400' />
-                <AlertDescription className='text-green-800 dark:text-green-200'>
-                  {successMessage}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            <Button
-              type='submit'
-              disabled={isLoading || isNavigating}
-              className='w-full bg-primary hover:bg-primary/90 text-primary-foreground'
-              size='lg'
-            >
-              {isLoading ? (
-                <div className='flex items-center gap-2'>
-                  <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent'></div>
-                  Sending Instructions...
-                </div>
-              ) : isNavigating ? (
-                <div className='flex items-center gap-2'>
-                  <div className='h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent'></div>
-                  Redirecting...
-                </div>
-              ) : (
-                'Send Reset Instructions'
-              )}
-            </Button>
-          </form>
-
-          <div className='text-center'>
-            <Link
-              href='/auth/login'
-              onClick={handleBackToLogin}
-              className='inline-flex items-center gap-1 text-sm font-medium text-primary hover:text-primary/80 transition-colors'
-            >
-              {isNavigating ? (
-                <>
-                  <div className='h-3 w-3 animate-spin rounded-full border-2 border-primary border-t-transparent'></div>
-                  Redirecting...
-                </>
-              ) : (
-                <>
-                  <ArrowLeft className='h-3 w-3' />
-                  Back to Sign In
-                </>
-              )}
-            </Link>
+    <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
+      {successMessage ? (
+        <div className='flex flex-col items-center gap-4 rounded-xl border border-success/30 bg-success/5 p-6 text-center'>
+          <span className='inline-flex h-11 w-11 items-center justify-center rounded-full bg-success/15 text-success'>
+            <MailCheck className='h-5 w-5' />
+          </span>
+          <div className='flex flex-col gap-1'>
+            <p className='text-[14px] font-semibold text-foreground'>
+              Check your inbox
+            </p>
+            <p className='text-[13px] leading-relaxed text-muted-foreground'>
+              {successMessage}
+            </p>
           </div>
-        </CardContent>
-      </Card>
+          <p className='font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground'>
+            Didn't get it? Check spam or try again in a minute.
+          </p>
+        </div>
+      ) : (
+        <FieldGroup
+          id='email'
+          label='Email'
+          error={errors.email}
+          hint="We'll email a secure reset link"
+        >
+          <Input
+            id='email'
+            type='email'
+            placeholder='you@company.com.ng'
+            autoComplete='email'
+            value={formData.email}
+            onChange={(e) => handleChange('email', e.target.value)}
+            className={cn(
+              'h-11 rounded-lg bg-background',
+              errors.email &&
+                'border-destructive focus-visible:ring-destructive/40'
+            )}
+            disabled={isBusy}
+          />
+        </FieldGroup>
+      )}
+
+      {errorMessage && (
+        <Alert
+          variant='destructive'
+          className='border-destructive/40 bg-destructive/5'
+        >
+          <AlertCircle className='h-4 w-4' />
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      )}
+
+      {!successMessage && (
+        <Button
+          type='submit'
+          disabled={isBusy}
+          className='h-11 w-full rounded-lg text-[13px] font-semibold tracking-tight'
+        >
+          {isLoading ? (
+            <span className='inline-flex items-center gap-2'>
+              <Loader2 className='h-4 w-4 animate-spin' />
+              Sending instructions…
+            </span>
+          ) : isNavigating ? (
+            <span className='inline-flex items-center gap-2'>
+              <Loader2 className='h-4 w-4 animate-spin' />
+              Redirecting…
+            </span>
+          ) : (
+            'Send reset instructions'
+          )}
+        </Button>
+      )}
+
+      <div className='relative py-1'>
+        <div className='absolute inset-0 flex items-center'>
+          <span className='w-full border-t border-border/70' />
+        </div>
+        <div className='relative flex justify-center'>
+          <span className='bg-surface px-3 font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground'>
+            remembered it?
+          </span>
+        </div>
+      </div>
+
+      <Link
+        href='/auth/login'
+        onClick={handleBackToLogin}
+        className='inline-flex items-center justify-center gap-2 rounded-lg border border-border/70 bg-background/60 px-4 py-2.5 text-[13px] font-medium text-foreground transition-colors hover:border-border-strong hover:bg-muted/40'
+      >
+        {isNavigating ? (
+          <>
+            <Loader2 className='h-4 w-4 animate-spin' />
+            Redirecting…
+          </>
+        ) : (
+          <>
+            <ArrowLeft className='h-4 w-4' />
+            Back to sign in
+          </>
+        )}
+      </Link>
+    </form>
+  );
+}
+
+function FieldGroup({
+  id,
+  label,
+  error,
+  hint,
+  rightSlot,
+  children,
+}: {
+  id: string;
+  label: string;
+  error?: string;
+  hint?: string;
+  rightSlot?: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className='flex flex-col gap-1.5'>
+      <div className='flex items-baseline justify-between'>
+        <Label
+          htmlFor={id}
+          className='font-mono text-[10px] uppercase tracking-[0.22em] text-muted-foreground'
+        >
+          {label}
+        </Label>
+        {rightSlot ? (
+          rightSlot
+        ) : hint && !error ? (
+          <span className='text-[10px] text-muted-foreground/70'>{hint}</span>
+        ) : null}
+      </div>
+      {children}
+      {error && (
+        <p className='inline-flex items-center gap-1 text-[11px] font-medium text-destructive'>
+          <AlertCircle className='h-3 w-3' />
+          {error}
+        </p>
+      )}
     </div>
   );
 }

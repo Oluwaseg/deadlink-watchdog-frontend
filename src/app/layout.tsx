@@ -2,6 +2,7 @@ import { ApiProvider } from '@/components/providers/api-provider';
 import { JotaiProvider } from '@/components/providers/jotai-provider';
 import { QueryProvider } from '@/components/providers/query-provider';
 import { ThemeProvider } from '@/components/providers/theme-provider';
+import { AccessibilityButton } from '@/components/public/site/AccessibilityButton';
 import { Toaster } from '@/components/ui/toaster';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
@@ -43,6 +44,7 @@ export default function RootLayout({
               <ApiProvider>
                 {children}
                 <Toaster />
+                <AccessibilityButton />
               </ApiProvider>
             </QueryProvider>
           </ThemeProvider>
