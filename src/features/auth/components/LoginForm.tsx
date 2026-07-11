@@ -77,16 +77,29 @@ export function LoginForm() {
       },
       onError: (error: Error | unknown) => {
         setIsLoading(false);
-        const err =
-          error instanceof Error ? error : new Error('An error occurred');
-        if ('code' in err && err.code === 'EMAIL_NOT_VERIFIED') {
-          setEmailNotVerified(true);
-          setUnverifiedEmail(formData.email);
+
+        // Handle plain error objects from API
+        if (error && typeof error === 'object' && 'code' in error) {
+          const apiError = error as { code?: string; message?: string };
+          if (apiError.code === 'EMAIL_NOT_VERIFIED') {
+            setEmailNotVerified(true);
+            setUnverifiedEmail(formData.email);
+            setErrorMessage(
+              apiError.message || 'Please verify your email before logging in.'
+            );
+            return;
+          }
+        }
+
+        // Handle Error instances
+        if (error instanceof Error) {
+          setErrorMessage(error.message || 'Request failed');
+        } else if (error && typeof error === 'object' && 'message' in error) {
           setErrorMessage(
-            err.message || 'Please verify your email before logging in.'
+            (error as { message?: string }).message || 'Request failed'
           );
         } else {
-          setErrorMessage(err.message || 'Request failed');
+          setErrorMessage('An error occurred');
         }
       },
     });
