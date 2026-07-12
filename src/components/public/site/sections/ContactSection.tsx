@@ -1,21 +1,59 @@
 'use client';
 import { Reveal } from '@/components/public/site/Reveal';
 import { CheckCircle2, Mail, MessageSquare, Send } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 
 export function ContactSection() {
-  const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>(
+    'idle'
+  );
   const [form, setForm] = useState({ name: '', email: '', message: '' });
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const onSubmit = (e: React.FormEvent) => {
+  const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) return;
+
+    const endpoint = process.env.NEXT_PUBLIC_CONTACT_API_URL;
+    const apiKey = process.env.NEXT_PUBLIC_CONTACT_API_KEY;
+
+    if (!endpoint || !apiKey) {
+      setStatus('error');
+      setErrorMessage('Contact form endpoint is not configured yet.');
+      return;
+    }
+
     setStatus('sending');
-    setTimeout(() => {
+    setErrorMessage('');
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': apiKey,
+        },
+        body: JSON.stringify({
+          name: form.name.trim(),
+          email: form.email.trim(),
+          message: form.message.trim(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+
       setStatus('sent');
       setForm({ name: '', email: '', message: '' });
-      setTimeout(() => setStatus('idle'), 3500);
-    }, 900);
+    } catch (error) {
+      console.error('Contact form submission failed:', error);
+      setStatus('error');
+      setErrorMessage('Something went wrong. Please try again.');
+    } finally {
+      window.setTimeout(() => setStatus('idle'), 3500);
+    }
   };
 
   return (
@@ -115,7 +153,7 @@ export function ContactSection() {
                 </div>
                 <button
                   type='submit'
-                  disabled={status !== 'idle'}
+                  disabled={status === 'sending'}
                   className='group inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-semibold text-primary-foreground shadow-sm transition hover:opacity-95 disabled:opacity-70'
                 >
                   {status === 'sent' ? (
@@ -125,6 +163,8 @@ export function ContactSection() {
                     </>
                   ) : status === 'sending' ? (
                     'Sending...'
+                  ) : status === 'error' ? (
+                    'Try again'
                   ) : (
                     <>
                       Send message
@@ -132,10 +172,16 @@ export function ContactSection() {
                     </>
                   )}
                 </button>
-                <p className='text-center text-xs text-muted-foreground'>
-                  By submitting, you agree to our privacy policy. We'll never
-                  share your email.
-                </p>
+                {errorMessage ? (
+                  <p className='text-center text-sm text-destructive'>
+                    {errorMessage}
+                  </p>
+                ) : (
+                  <p className='text-center text-xs text-muted-foreground'>
+                    By submitting, you agree to our privacy policy. We'll never
+                    share your email.
+                  </p>
+                )}
               </div>
             </form>
           </Reveal>
