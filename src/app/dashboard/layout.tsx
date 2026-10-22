@@ -16,7 +16,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { useAuthState } from '@/features/auth/hooks/useAuth';
+import { useAuthState } from '@/hooks/use-auth';
 import { loginAtom } from '@/lib/auth-atoms';
 import { getCookie } from '@/lib/cookie-utils';
 import { useSetAtom } from 'jotai';

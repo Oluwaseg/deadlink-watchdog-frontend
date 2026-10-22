@@ -11,8 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useBrokenLinks } from '@/features/broken-links/hooks/useBrokenLinks';
-import type { BrokenLink, ErrorSummary } from '@/features/broken-links/types';
+import { useBrokenLinks } from '@/hooks/use-broken-links';
+import type { BrokenLink, ErrorSummary } from '@/types/broken-links';
 import {
   AlertCircle,
   AlertTriangle,

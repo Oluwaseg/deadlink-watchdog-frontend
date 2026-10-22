@@ -2,6 +2,13 @@
 
 import type React from 'react';
 
+import {
+  createWebsite,
+  deleteWebsite,
+  getWebsite,
+  triggerCrawl,
+  updateWebsite,
+} from '@/api-routes/websites-api';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import {
   AlertDialog,
@@ -43,14 +50,7 @@ import {
 } from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
-import {
-  createWebsite,
-  deleteWebsite,
-  getWebsite,
-  triggerCrawl,
-  updateWebsite,
-} from '@/features/websites/api/websitesApi';
-import { useWebsites } from '@/features/websites/hooks/useWebsites';
+import { useWebsites } from '@/hooks/use-websites';
 import {
   Activity,
   AlertTriangle,

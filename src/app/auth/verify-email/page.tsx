@@ -1,5 +1,5 @@
-import AuthLayout from '@/features/auth/components/AuthLayout';
-import { VerifyEmailForm } from '@/features/auth/components/VerifyEmailForm';
+import AuthLayout from '@/components/auth/AuthLayout';
+import { VerifyEmailForm } from '@/components/auth/VerifyEmailForm';
 
 export default function VerifyEmailPage() {
   return (

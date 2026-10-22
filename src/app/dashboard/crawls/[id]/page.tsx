@@ -1,10 +1,10 @@
 'use client';
 
+import { getCrawlResult } from '@/api-routes/crawls-api';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { getCrawlResult } from '@/features/crawls/api/crawlsApi';
-import type { CrawlResultResponse } from '@/features/crawls/types';
+import type { CrawlResultResponse } from '@/types/crawls';
 import { useQuery } from '@tanstack/react-query';
 import {
   Activity,

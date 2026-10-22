@@ -11,8 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { useCrawls } from '@/features/crawls/hooks/useCrawls';
-import type { CrawlResult } from '@/features/crawls/types';
+import { useCrawls } from '@/hooks/use-crawls';
+import type { CrawlResult } from '@/types/crawls';
 import {
   Activity,
   AlertCircle,

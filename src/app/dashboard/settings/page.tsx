@@ -2,6 +2,7 @@
 
 import type React from 'react';
 
+import { changePassword, updateProfile } from '@/api-routes/auth-api';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -13,7 +14,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
-import { changePassword, updateProfile } from '@/features/auth/api/authApi';
 import { userAtom } from '@/lib/auth-atoms';
 import { useAtomValue } from 'jotai';
 import {
@@ -74,7 +74,8 @@ export default function SettingsPage() {
         description: response.message,
       });
     } catch (error: Error | unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to update profile';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to update profile';
       toast({
         title: 'Error',
         description: errorMessage,
@@ -128,7 +129,8 @@ export default function SettingsPage() {
         confirmPassword: '',
       });
     } catch (error: Error | unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to change password';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to change password';
       toast({
         title: 'Error',
         description: errorMessage,
@@ -434,7 +436,7 @@ export default function SettingsPage() {
                     </div>
                     {passwordData.confirmPassword &&
                       passwordData.newPassword !==
-                      passwordData.confirmPassword && (
+                        passwordData.confirmPassword && (
                         <p className='text-xs text-destructive'>
                           Passwords do not match
                         </p>

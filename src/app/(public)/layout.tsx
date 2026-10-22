@@ -2,7 +2,7 @@
 import { CookieConsent } from '@/components/public/site/CookieConsent';
 import { Footer } from '@/components/public/site/Footer';
 import { Navbar } from '@/components/public/site/Navbar';
-import { useAuthState } from '@/features/auth/hooks/useAuth';
+import { useAuthState } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 export default function PublicLayout({

@@ -1,4 +1,4 @@
-import { User } from '@/features/auth/types';
+import { User } from '@/types';
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 

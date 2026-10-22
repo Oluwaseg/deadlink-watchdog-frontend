@@ -1,5 +1,6 @@
 'use client';
 
+import { logout } from '@/api-routes/auth-api';
 import { ModeToggle } from '@/components/shared/switch';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import {
@@ -22,8 +23,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/components/ui/sidebar';
-import { logout } from '@/features/auth/api/authApi';
-import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
+import { useCurrentUser } from '@/hooks/use-current-user';
 import {
   Activity,
   AlertCircle,

@@ -12,9 +12,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { useCurrentUser } from '@/features/auth/hooks/useCurrentUser';
-import { useDashboardOverview } from '@/features/dashboard/hooks/useDashboard';
-import type { CrawlActivity, Website } from '@/features/dashboard/types';
+import { useCurrentUser } from '@/hooks/use-current-user';
+import { useDashboardOverview } from '@/hooks/use-dashboard';
+import type { CrawlActivity, Website } from '@/types/dashboard';
 import {
   Activity,
   AlertCircle,
@@ -250,8 +250,8 @@ export default function DashboardPage() {
                 {overview.averageHealthScore >= 80
                   ? 'Excellent! Your websites are performing well.'
                   : overview.averageHealthScore >= 60
-                  ? 'Good performance with room for improvement.'
-                  : 'Attention needed. Consider reviewing broken links.'}
+                    ? 'Good performance with room for improvement.'
+                    : 'Attention needed. Consider reviewing broken links.'}
               </p>
             </div>
           </CardContent>
@@ -297,8 +297,8 @@ export default function DashboardPage() {
                           website.healthScore >= 80
                             ? 'default'
                             : website.healthScore >= 60
-                            ? 'secondary'
-                            : 'destructive'
+                              ? 'secondary'
+                              : 'destructive'
                         }
                         className='font-mono'
                       >
