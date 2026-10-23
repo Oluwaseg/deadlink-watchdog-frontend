@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import { resetPasswordSchema } from '@/validation/schemas';
 import {
   AlertCircle,
   ArrowLeft,
@@ -20,7 +21,6 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { resetPassword } from '../../api-routes/auth-api';
-import { resetPasswordSchema } from '../../features/auth/validation/schemas';
 
 type ResetPasswordFormData = {
   newPassword: string;
