@@ -1,38 +1,10 @@
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
-import { Analytics } from '@/components/admin/Analytics';
-import { QueueStats } from '@/components/admin/QueueStats';
-import { UsersTable } from '@/components/admin/UsersTable';
-import { WebsitesModerationTable } from '@/components/admin/WebsitesModerationTable';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function AdminPage() {
   return (
-    <div className='container mx-auto py-6'>
-      <h1 className='mb-6 text-3xl font-bold'>Admin Dashboard</h1>
-      <Tabs defaultValue='overview' className='space-y-4'>
-        <TabsList>
-          <TabsTrigger value='overview'>Overview</TabsTrigger>
-          <TabsTrigger value='users'>Users</TabsTrigger>
-          <TabsTrigger value='moderation'>Moderation</TabsTrigger>
-          <TabsTrigger value='queue'>Queue</TabsTrigger>
-          <TabsTrigger value='analytics'>Analytics</TabsTrigger>
-        </TabsList>
-        <TabsContent value='overview' className='space-y-4'>
-          <AdminDashboard />
-        </TabsContent>
-        <TabsContent value='users'>
-          <UsersTable />
-        </TabsContent>
-        <TabsContent value='moderation'>
-          <WebsitesModerationTable />
-        </TabsContent>
-        <TabsContent value='queue'>
-          <QueueStats />
-        </TabsContent>
-        <TabsContent value='analytics'>
-          <Analytics />
-        </TabsContent>
-      </Tabs>
-    </div>
+    <section className='container mx-auto space-y-4 py-6'>
+      <h1 className='text-2xl font-bold'>Admin Dashboard</h1>
+      <AdminDashboard />
+    </section>
   );
 }
