@@ -18,7 +18,7 @@ export function ModeToggle({ className }: { className?: string }) {
 
   useEffect(() => setMounted(true), []);
 
-  const active = (theme ?? 'system') as 'light' | 'dark' | 'system';
+  const active = (mounted ? theme : 'system') as 'light' | 'dark' | 'system';
   const isDark = mounted ? resolvedTheme === 'dark' : false;
 
   const options = [
