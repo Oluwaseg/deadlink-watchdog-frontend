@@ -48,7 +48,8 @@ export const useVerifyEmail = () => {
           refreshToken: data.data.tokens.refreshToken,
         });
 
-        window.location.href = '/dashboard';
+        window.location.href =
+          data.data.user.role === 'admin' ? '/admin' : '/dashboard';
       } else {
         console.error('No tokens in verification response:', data);
       }
@@ -77,7 +78,8 @@ export const useLogin = () => {
         });
 
         queryClient.invalidateQueries({ queryKey: ['user'] });
-        window.location.href = '/dashboard';
+        window.location.href =
+          data.data.user.role === 'admin' ? '/admin' : '/dashboard';
       }
     },
   });

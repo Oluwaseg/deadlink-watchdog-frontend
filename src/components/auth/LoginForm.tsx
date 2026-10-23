@@ -70,7 +70,6 @@ export function LoginForm() {
         setIsLoading(false);
         if (response.success) {
           setIsNavigating(true);
-          router.push('/dashboard');
         } else {
           setErrorMessage(response.message || 'Request failed');
         }
