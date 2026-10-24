@@ -5,6 +5,7 @@ import {
   logoutAtom,
   updateUserAtom,
 } from '@/lib/auth-atoms';
+import { setAuthTokens } from '@/lib/auth-storage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useRouter } from 'next/navigation';
@@ -39,8 +40,7 @@ export const useVerifyEmail = () => {
     mutationFn: authApi.verifyEmail,
     onSuccess: (data) => {
       if (data.data && data.data.tokens) {
-        document.cookie = `accessToken-deadlink-watchdog=${data.data.tokens.accessToken}; path=/; secure; samesite=strict; max-age=3600`;
-        document.cookie = `refreshToken-deadlink-watchdog=${data.data.tokens.refreshToken}; path=/; secure; samesite=strict; max-age=86400`;
+        setAuthTokens(data.data.tokens);
 
         login({
           user: data.data.user,
@@ -68,8 +68,7 @@ export const useLogin = () => {
     mutationFn: authApi.loginUser,
     onSuccess: (data) => {
       if (data.data && data.data.tokens) {
-        document.cookie = `accessToken-deadlink-watchdog=${data.data.tokens.accessToken}; path=/; secure; samesite=strict; max-age=3600`;
-        document.cookie = `refreshToken-deadlink-watchdog=${data.data.tokens.refreshToken}; path=/; secure; samesite=strict; max-age=86400`;
+        setAuthTokens(data.data.tokens);
 
         login({
           user: data.data.user,

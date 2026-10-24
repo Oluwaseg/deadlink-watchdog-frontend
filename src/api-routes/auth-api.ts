@@ -1,4 +1,5 @@
 import { getApiClient } from '@/lib/api-client';
+import { clearAuthTokens } from '@/lib/auth-storage';
 import type {
   AuthResponse,
   ChangePasswordForm,
@@ -94,13 +95,10 @@ export const resetPassword = async (
 
 // Logout
 export const logout = async (): Promise<void> => {
-  // Clear all auth-related items from localStorage
-  localStorage.removeItem('user');
-  localStorage.removeItem('auth-state');
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem('user');
+    localStorage.removeItem('auth-state');
+  }
 
-  // Clear cookies with proper attributes
-  document.cookie =
-    'accessToken-deadlink-watchdog=; path=/; secure; samesite=strict; max-age=0';
-  document.cookie =
-    'refreshToken-deadlink-watchdog=; path=/; secure; samesite=strict; max-age=0';
+  clearAuthTokens();
 };

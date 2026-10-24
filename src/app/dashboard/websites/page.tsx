@@ -1147,121 +1147,162 @@ export default function WebsitesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Stats Cards */}
-      <div className='grid gap-4 md:grid-cols-4'>
-        <Card className='border-l-4 border-l-primary'>
-          <CardContent className='p-6'>
-            <div className='flex items-center justify-between'>
-              <div>
-                <p className='text-sm font-medium text-muted-foreground'>
-                  Total Websites
-                </p>
-                <p className='text-2xl font-bold'>{pagination.total}</p>
-              </div>
-              <Globe className='h-8 w-8 text-primary' />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className='border-l-4 border-l-emerald-500'>
-          <CardContent className='p-6'>
-            <div className='flex items-center justify-between'>
-              <div>
-                <p className='text-sm font-medium text-muted-foreground'>
-                  Active
-                </p>
-                <p className='text-2xl font-bold text-emerald-600'>
-                  {websites.filter((w) => w.isActive).length}
-                </p>
-              </div>
-              <Activity className='h-8 w-8 text-emerald-500' />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className='border-l-4 border-l-secondary'>
-          <CardContent className='p-6'>
-            <div className='flex items-center justify-between'>
-              <div>
-                <p className='text-sm font-medium text-muted-foreground'>
-                  Avg Health
-                </p>
-                <p className='text-2xl font-bold text-secondary'>
-                  {Math.round(
-                    websites.reduce((acc, w) => acc + w.healthScore, 0) /
-                      websites.length
+      {/* Stats Overview */}
+      {(() => {
+        const activeCount = websites.filter((w) => w.isActive).length;
+        const activePct = websites.length
+          ? Math.round((activeCount / websites.length) * 100)
+          : 0;
+        const avgHealth = websites.length
+          ? Math.round(
+              websites.reduce((acc, w) => acc + w.healthScore, 0) /
+                websites.length
+            )
+          : 0;
+        const totalLinks = websites.reduce((acc, w) => acc + w.totalLinks, 0);
+        const healthTone =
+          avgHealth >= 90
+            ? 'bg-emerald-500'
+            : avgHealth >= 70
+              ? 'bg-yellow-500'
+              : 'bg-red-500';
+        const stats = [
+          {
+            label: 'Total Websites',
+            value: pagination.total.toLocaleString(),
+            hint: `${websites.length} on this page`,
+            icon: Globe,
+          },
+          {
+            label: 'Active',
+            value: activeCount.toLocaleString(),
+            hint: `${activePct}% of monitored sites`,
+            icon: Activity,
+            bar: { pct: activePct, tone: 'bg-emerald-500' },
+          },
+          {
+            label: 'Avg Health',
+            value: `${avgHealth}%`,
+            hint:
+              avgHealth >= 90
+                ? 'Looking healthy'
+                : avgHealth >= 70
+                  ? 'Needs some attention'
+                  : 'Critical issues',
+            icon: TrendingUp,
+            bar: { pct: avgHealth, tone: healthTone },
+          },
+          {
+            label: 'Total Links',
+            value: totalLinks.toLocaleString(),
+            hint: 'Across all crawled pages',
+            icon: LinkIcon,
+          },
+        ];
+        return (
+          <div className='rounded-xl border bg-card shadow-sm'>
+            <div className='grid grid-cols-2 lg:grid-cols-4 divide-y lg:divide-y-0 lg:divide-x'>
+              {stats.map((s) => (
+                <div key={s.label} className='p-5 space-y-3'>
+                  <div className='flex items-center justify-between'>
+                    <p className='text-xs font-medium uppercase tracking-wider text-muted-foreground'>
+                      {s.label}
+                    </p>
+                    <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-muted'>
+                      <s.icon className='h-4 w-4 text-muted-foreground' />
+                    </div>
+                  </div>
+                  <p className='text-3xl font-semibold tracking-tight tabular-nums'>
+                    {s.value}
+                  </p>
+                  {s.bar ? (
+                    <div className='space-y-1.5'>
+                      <div className='h-1.5 w-full overflow-hidden rounded-full bg-muted'>
+                        <div
+                          className={`h-full rounded-full transition-all ${s.bar.tone}`}
+                          style={{ width: `${s.bar.pct}%` }}
+                        />
+                      </div>
+                      <p className='text-xs text-muted-foreground'>{s.hint}</p>
+                    </div>
+                  ) : (
+                    <p className='text-xs text-muted-foreground'>{s.hint}</p>
                   )}
-                  %
-                </p>
-              </div>
-              <TrendingUp className='h-8 w-8 text-secondary' />
+                </div>
+              ))}
             </div>
-          </CardContent>
-        </Card>
-        <Card className='border-l-4 border-l-blue-500'>
-          <CardContent className='p-6'>
-            <div className='flex items-center justify-between'>
-              <div>
-                <p className='text-sm font-medium text-muted-foreground'>
-                  Total Links
-                </p>
-                <p className='text-2xl font-bold text-blue-600'>
-                  {websites
-                    .reduce((acc, w) => acc + w.totalLinks, 0)
-                    .toLocaleString()}
-                </p>
-              </div>
-              <LinkIcon className='h-8 w-8 text-blue-500' />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+          </div>
+        );
+      })()}
 
-      {/* Filters */}
-      <Card className='p-6'>
-        <div className='flex flex-col gap-4 md:flex-row md:items-center'>
-          <div className='relative flex-1'>
+      {/* Toolbar */}
+      <div className='flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between'>
+        {/* Status segmented control */}
+        <div className='inline-flex w-fit items-center rounded-lg border bg-muted/50 p-1'>
+          {[
+            { label: 'All', value: undefined },
+            { label: 'Active', value: true },
+            { label: 'Inactive', value: false },
+          ].map((opt) => (
+            <button
+              key={opt.label}
+              type='button'
+              onClick={() => setIsActive(opt.value)}
+              className={`rounded-md px-3 py-1.5 text-sm font-medium transition-all ${
+                isActive === opt.value
+                  ? 'bg-background text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+
+        <div className='flex flex-col gap-2 sm:flex-row sm:items-center'>
+          <div className='relative sm:w-72'>
             <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
             <Input
-              placeholder='Search websites...'
+              placeholder='Search by name or URL...'
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className='pl-10'
+              className='h-9 pl-9'
             />
           </div>
-          <div className='flex gap-2'>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className='w-48'>
-                <Filter className='h-4 w-4 mr-2' />
-                <SelectValue placeholder='All Categories' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='all'>All Categories</SelectItem>
-                <SelectItem value='news'>News</SelectItem>
-                <SelectItem value='government'>Government</SelectItem>
-                <SelectItem value='business'>Business</SelectItem>
-                <SelectItem value='education'>Education</SelectItem>
-                <SelectItem value='entertainment'>Entertainment</SelectItem>
-                <SelectItem value='financial'>Financial</SelectItem>
-                <SelectItem value='other'>Other</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select
-              value={isActive === undefined ? '' : isActive.toString()}
-              onValueChange={(value) =>
-                setIsActive(value === '' ? undefined : value === 'true')
-              }
+          <Select value={category} onValueChange={setCategory}>
+            <SelectTrigger className='h-9 sm:w-44'>
+              <Filter className='h-4 w-4 mr-2 text-muted-foreground' />
+              <SelectValue placeholder='All Categories' />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value='all'>All Categories</SelectItem>
+              <SelectItem value='news'>News</SelectItem>
+              <SelectItem value='government'>Government</SelectItem>
+              <SelectItem value='business'>Business</SelectItem>
+              <SelectItem value='education'>Education</SelectItem>
+              <SelectItem value='entertainment'>Entertainment</SelectItem>
+              <SelectItem value='financial'>Financial</SelectItem>
+              <SelectItem value='other'>Other</SelectItem>
+            </SelectContent>
+          </Select>
+          {(searchQuery ||
+            (category && category !== 'all') ||
+            isActive !== undefined) && (
+            <Button
+              variant='ghost'
+              size='sm'
+              className='h-9 text-muted-foreground'
+              onClick={() => {
+                setSearchQuery('');
+                setCategory('');
+                setIsActive(undefined);
+              }}
             >
-              <SelectTrigger className='w-32'>
-                <SelectValue placeholder='Status' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='all'>All Status</SelectItem>
-                <SelectItem value='true'>Active</SelectItem>
-                <SelectItem value='false'>Inactive</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+              Clear
+            </Button>
+          )}
         </div>
-      </Card>
+      </div>
 
       {/* Error Alert */}
       {error && (
@@ -1275,134 +1316,170 @@ export default function WebsitesPage() {
         </Card>
       )}
 
-      {/* Websites Grid */}
-      <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
-        {filteredWebsites.map((website) => (
-          <Card
-            key={website.id}
-            className={`group overflow-hidden transition-all hover:shadow-lg hover:-translate-y-1 ${
-              loadingWebsites.has(website.id)
-                ? 'opacity-75 pointer-events-none'
-                : ''
-            }`}
-          >
-            <CardHeader className='pb-3'>
-              <div className='flex items-start justify-between'>
-                <div className='space-y-1 flex-1 min-w-0'>
-                  <h3 className='font-semibold truncate group-hover:text-primary transition-colors'>
-                    {website.name}
-                  </h3>
-                  <p className='text-sm text-muted-foreground truncate'>
-                    {website.url}
-                  </p>
-                  {website.category && (
-                    <Badge variant='secondary' className='text-xs'>
-                      {website.category}
-                    </Badge>
-                  )}
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant='ghost' size='sm' className='h-8 w-8 p-0'>
-                      <MoreVertical className='h-4 w-4' />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align='end'>
-                    <DropdownMenuItem
-                      onClick={() => handleOpenEditModal(website)}
-                    >
-                      <Pencil className='h-4 w-4 mr-2' />
-                      Edit
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => handleTriggerCrawl(website.id)}
-                      disabled={loadingWebsites.has(website.id)}
-                    >
-                      <RefreshCcw
-                        className={`h-4 w-4 mr-2 ${
-                          loadingWebsites.has(website.id) ? 'animate-spin' : ''
-                        }`}
-                      />
-                      Crawl Now
-                    </DropdownMenuItem>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                          <Trash2 className='h-4 w-4 mr-2' />
-                          Delete
-                        </DropdownMenuItem>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Website</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Are you sure you want to delete &quot;{website.name}
-                            &quot;? This action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() => handleDelete(website.id)}
-                            className='bg-destructive hover:bg-destructive/90'
-                          >
-                            Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </CardHeader>
-            <CardContent className='space-y-4'>
-              <div className='flex items-center gap-4'>
-                <Badge
-                  variant={website.isActive ? 'default' : 'secondary'}
-                  className={
-                    website.isActive
-                      ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100'
+      {/* Websites Table */}
+      <Card className='overflow-hidden shadow-sm'>
+        <div className='flex items-center justify-between border-b px-4 py-3'>
+          <p className='text-sm font-medium'>
+            {filteredWebsites.length}{' '}
+            {filteredWebsites.length === 1 ? 'website' : 'websites'}
+          </p>
+          {searchQuery && (
+            <p className='text-xs text-muted-foreground'>
+              Matching &quot;{searchQuery}&quot;
+            </p>
+          )}
+        </div>
+        <div className='overflow-x-auto'>
+          <table className='w-full text-sm'>
+            <thead className='bg-muted/40 border-b'>
+              <tr className='text-left text-xs uppercase tracking-wider text-muted-foreground'>
+                <th className='px-4 py-3 font-medium'>Website</th>
+                <th className='px-4 py-3 font-medium'>Category</th>
+                <th className='px-4 py-3 font-medium'>Status</th>
+                <th className='px-4 py-3 font-medium'>Health</th>
+                <th className='px-4 py-3 font-medium text-right'>Links</th>
+                <th className='px-4 py-3 font-medium'>Last Crawl</th>
+                <th className='px-4 py-3 font-medium text-right'>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredWebsites.map((website) => (
+                <tr
+                  key={website.id}
+                  className={`border-b last:border-0 transition-colors hover:bg-muted/30 ${
+                    loadingWebsites.has(website.id)
+                      ? 'opacity-75 pointer-events-none'
                       : ''
-                  }
+                  }`}
                 >
-                  {website.isActive ? 'Active' : 'Inactive'}
-                </Badge>
-                <div
-                  className={`flex items-center gap-1 px-2 py-1 rounded-md border text-xs font-medium ${getHealthScoreColor(
-                    website.healthScore
-                  )}`}
-                >
-                  {getHealthScoreIcon(website.healthScore)}
-                  {website.healthScore}%
-                </div>
-              </div>
-
-              <div className='grid grid-cols-2 gap-4 text-sm'>
-                <div className='space-y-1'>
-                  <p className='text-muted-foreground'>Links</p>
-                  <p className='font-medium'>
+                  <td className='px-4 py-3 max-w-[280px]'>
+                    <div className='flex items-center gap-3'>
+                      <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-sm font-semibold uppercase text-muted-foreground'>
+                        {website.name.charAt(0)}
+                      </div>
+                      <div className='min-w-0'>
+                        <p className='font-medium truncate'>{website.name}</p>
+                        <p className='text-xs text-muted-foreground truncate'>
+                          {website.url}
+                        </p>
+                      </div>
+                    </div>
+                    {website.description && (
+                      <p className='text-xs text-muted-foreground line-clamp-1 mt-1 pl-12'>
+                        {website.description}
+                      </p>
+                    )}
+                  </td>
+                  <td className='px-4 py-3'>
+                    {website.category ? (
+                      <Badge variant='secondary' className='text-xs'>
+                        {website.category}
+                      </Badge>
+                    ) : (
+                      <span className='text-muted-foreground'>—</span>
+                    )}
+                  </td>
+                  <td className='px-4 py-3'>
+                    <Badge
+                      variant={website.isActive ? 'default' : 'secondary'}
+                      className={
+                        website.isActive
+                          ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100'
+                          : ''
+                      }
+                    >
+                      {website.isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </td>
+                  <td className='px-4 py-3'>
+                    <div
+                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-md border text-xs font-medium ${getHealthScoreColor(
+                        website.healthScore
+                      )}`}
+                    >
+                      {getHealthScoreIcon(website.healthScore)}
+                      {website.healthScore}%
+                    </div>
+                  </td>
+                  <td className='px-4 py-3 text-right font-medium'>
                     {website.totalLinks.toLocaleString()}
-                  </p>
-                </div>
-                <div className='space-y-1'>
-                  <p className='text-muted-foreground'>Last Crawl</p>
-                  <p className='font-medium'>
+                  </td>
+                  <td className='px-4 py-3 font-medium whitespace-nowrap'>
                     {website.lastCrawledAt
                       ? new Date(website.lastCrawledAt).toLocaleDateString()
                       : 'Never'}
-                  </p>
-                </div>
-              </div>
-
-              {website.description && (
-                <p className='text-sm text-muted-foreground line-clamp-2'>
-                  {website.description}
-                </p>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                  </td>
+                  <td className='px-4 py-3 text-right'>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant='ghost'
+                          size='sm'
+                          className='h-8 w-8 p-0'
+                        >
+                          <MoreVertical className='h-4 w-4' />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align='end'>
+                        <DropdownMenuItem
+                          onClick={() => handleOpenEditModal(website)}
+                        >
+                          <Pencil className='h-4 w-4 mr-2' />
+                          Edit
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleTriggerCrawl(website.id)}
+                          disabled={loadingWebsites.has(website.id)}
+                        >
+                          <RefreshCcw
+                            className={`h-4 w-4 mr-2 ${
+                              loadingWebsites.has(website.id)
+                                ? 'animate-spin'
+                                : ''
+                            }`}
+                          />
+                          Crawl Now
+                        </DropdownMenuItem>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <DropdownMenuItem
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              <Trash2 className='h-4 w-4 mr-2' />
+                              Delete
+                            </DropdownMenuItem>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Delete Website
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete &quot;
+                                {website.name}
+                                &quot;? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDelete(website.id)}
+                                className='bg-destructive hover:bg-destructive/90'
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </Card>
 
       {/* Pagination */}
       {pagination.pages > 1 && (

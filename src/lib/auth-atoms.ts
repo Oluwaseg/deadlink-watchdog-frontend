@@ -1,6 +1,7 @@
 import { User } from '@/types';
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
+import { clearAuthTokens } from './auth-storage';
 
 export interface AuthState {
   user: User | null;
@@ -57,19 +58,11 @@ export const logoutAtom = atom(null, (get, set) => {
   set(accessTokenAtom, null);
   set(refreshTokenAtom, null);
 
-  // Clear localStorage items
-  localStorage.removeItem('user');
-  localStorage.removeItem('accessToken-deadlink-watchdog');
-  localStorage.removeItem('refreshToken-deadlink-watchdog');
-
-  // Clear cookies
-  document.cookie =
-    'accessToken-deadlink-watchdog=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-  document.cookie =
-    'refreshToken-deadlink-watchdog=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-
-  // Clear any other related items
-  localStorage.removeItem('auth-state');
+  if (typeof localStorage !== 'undefined') {
+    localStorage.removeItem('user');
+    localStorage.removeItem('auth-state');
+  }
+  clearAuthTokens();
 });
 
 export const updateUserAtom = atom(null, (get, set, user: User) => {
