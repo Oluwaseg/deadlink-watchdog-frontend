@@ -402,9 +402,19 @@ export default function WebsitesPage() {
     );
   }
 
-  // Check if we have no websites at all
+  if (!data?.data) {
+    return null;
+  }
+
+  const hasActiveFilters = Boolean(
+    searchQuery.trim() ||
+    (category && category !== 'all') ||
+    isActive !== undefined
+  );
   const hasNoWebsites =
-    !data?.data?.websites || data.data.websites.length === 0;
+    Boolean(data?.data) &&
+    data.data.pagination.total === 0 &&
+    !hasActiveFilters;
 
   if (hasNoWebsites) {
     return (
@@ -1343,139 +1353,164 @@ export default function WebsitesPage() {
               </tr>
             </thead>
             <tbody>
-              {filteredWebsites.map((website) => (
-                <tr
-                  key={website.id}
-                  className={`border-b last:border-0 transition-colors hover:bg-muted/30 ${
-                    loadingWebsites.has(website.id)
-                      ? 'opacity-75 pointer-events-none'
-                      : ''
-                  }`}
-                >
-                  <td className='px-4 py-3 max-w-[280px]'>
-                    <div className='flex items-center gap-3'>
-                      <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-sm font-semibold uppercase text-muted-foreground'>
-                        {website.name.charAt(0)}
-                      </div>
-                      <div className='min-w-0'>
-                        <p className='font-medium truncate'>{website.name}</p>
-                        <p className='text-xs text-muted-foreground truncate'>
-                          {website.url}
-                        </p>
-                      </div>
-                    </div>
-                    {website.description && (
-                      <p className='text-xs text-muted-foreground line-clamp-1 mt-1 pl-12'>
-                        {website.description}
-                      </p>
+              {filteredWebsites.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={7}
+                    className='px-4 py-12 text-center text-muted-foreground'
+                  >
+                    No websites match these filters.
+                    {(searchQuery || category || isActive !== undefined) && (
+                      <button
+                        type='button'
+                        className='ml-2 font-medium text-foreground underline underline-offset-4'
+                        onClick={() => {
+                          setSearchQuery('');
+                          setCategory('');
+                          setIsActive(undefined);
+                          setPage(1);
+                        }}
+                      >
+                        Clear filters
+                      </button>
                     )}
-                  </td>
-                  <td className='px-4 py-3'>
-                    {website.category ? (
-                      <Badge variant='secondary' className='text-xs'>
-                        {website.category}
-                      </Badge>
-                    ) : (
-                      <span className='text-muted-foreground'>—</span>
-                    )}
-                  </td>
-                  <td className='px-4 py-3'>
-                    <Badge
-                      variant={website.isActive ? 'default' : 'secondary'}
-                      className={
-                        website.isActive
-                          ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100'
-                          : ''
-                      }
-                    >
-                      {website.isActive ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </td>
-                  <td className='px-4 py-3'>
-                    <div
-                      className={`inline-flex items-center gap-1 px-2 py-1 rounded-md border text-xs font-medium ${getHealthScoreColor(
-                        website.healthScore
-                      )}`}
-                    >
-                      {getHealthScoreIcon(website.healthScore)}
-                      {website.healthScore}%
-                    </div>
-                  </td>
-                  <td className='px-4 py-3 text-right font-medium'>
-                    {website.totalLinks.toLocaleString()}
-                  </td>
-                  <td className='px-4 py-3 font-medium whitespace-nowrap'>
-                    {website.lastCrawledAt
-                      ? new Date(website.lastCrawledAt).toLocaleDateString()
-                      : 'Never'}
-                  </td>
-                  <td className='px-4 py-3 text-right'>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant='ghost'
-                          size='sm'
-                          className='h-8 w-8 p-0'
-                        >
-                          <MoreVertical className='h-4 w-4' />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align='end'>
-                        <DropdownMenuItem
-                          onClick={() => handleOpenEditModal(website)}
-                        >
-                          <Pencil className='h-4 w-4 mr-2' />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleTriggerCrawl(website.id)}
-                          disabled={loadingWebsites.has(website.id)}
-                        >
-                          <RefreshCcw
-                            className={`h-4 w-4 mr-2 ${
-                              loadingWebsites.has(website.id)
-                                ? 'animate-spin'
-                                : ''
-                            }`}
-                          />
-                          Crawl Now
-                        </DropdownMenuItem>
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <DropdownMenuItem
-                              onSelect={(e) => e.preventDefault()}
-                            >
-                              <Trash2 className='h-4 w-4 mr-2' />
-                              Delete
-                            </DropdownMenuItem>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>
-                                Delete Website
-                              </AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Are you sure you want to delete &quot;
-                                {website.name}
-                                &quot;? This action cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => handleDelete(website.id)}
-                                className='bg-destructive hover:bg-destructive/90'
-                              >
-                                Delete
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredWebsites.map((website) => (
+                  <tr
+                    key={website.id}
+                    className={`border-b last:border-0 transition-colors hover:bg-muted/30 ${
+                      loadingWebsites.has(website.id)
+                        ? 'opacity-75 pointer-events-none'
+                        : ''
+                    }`}
+                  >
+                    <td className='px-4 py-3 max-w-[280px]'>
+                      <div className='flex items-center gap-3'>
+                        <div className='flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted text-sm font-semibold uppercase text-muted-foreground'>
+                          {website.name.charAt(0)}
+                        </div>
+                        <div className='min-w-0'>
+                          <p className='font-medium truncate'>{website.name}</p>
+                          <p className='text-xs text-muted-foreground truncate'>
+                            {website.url}
+                          </p>
+                        </div>
+                      </div>
+                      {website.description && (
+                        <p className='text-xs text-muted-foreground line-clamp-1 mt-1 pl-12'>
+                          {website.description}
+                        </p>
+                      )}
+                    </td>
+                    <td className='px-4 py-3'>
+                      {website.category ? (
+                        <Badge variant='secondary' className='text-xs'>
+                          {website.category}
+                        </Badge>
+                      ) : (
+                        <span className='text-muted-foreground'>—</span>
+                      )}
+                    </td>
+                    <td className='px-4 py-3'>
+                      <Badge
+                        variant={website.isActive ? 'default' : 'secondary'}
+                        className={
+                          website.isActive
+                            ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-100'
+                            : ''
+                        }
+                      >
+                        {website.isActive ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </td>
+                    <td className='px-4 py-3'>
+                      <div
+                        className={`inline-flex items-center gap-1 px-2 py-1 rounded-md border text-xs font-medium ${getHealthScoreColor(
+                          website.healthScore
+                        )}`}
+                      >
+                        {getHealthScoreIcon(website.healthScore)}
+                        {website.healthScore}%
+                      </div>
+                    </td>
+                    <td className='px-4 py-3 text-right font-medium'>
+                      {website.totalLinks.toLocaleString()}
+                    </td>
+                    <td className='px-4 py-3 font-medium whitespace-nowrap'>
+                      {website.lastCrawledAt
+                        ? new Date(website.lastCrawledAt).toLocaleDateString()
+                        : 'Never'}
+                    </td>
+                    <td className='px-4 py-3 text-right'>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            className='h-8 w-8 p-0'
+                          >
+                            <MoreVertical className='h-4 w-4' />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align='end'>
+                          <DropdownMenuItem
+                            onClick={() => handleOpenEditModal(website)}
+                          >
+                            <Pencil className='h-4 w-4 mr-2' />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => handleTriggerCrawl(website.id)}
+                            disabled={loadingWebsites.has(website.id)}
+                          >
+                            <RefreshCcw
+                              className={`h-4 w-4 mr-2 ${
+                                loadingWebsites.has(website.id)
+                                  ? 'animate-spin'
+                                  : ''
+                              }`}
+                            />
+                            Crawl Now
+                          </DropdownMenuItem>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <DropdownMenuItem
+                                onSelect={(e) => e.preventDefault()}
+                              >
+                                <Trash2 className='h-4 w-4 mr-2' />
+                                Delete
+                              </DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>
+                                  Delete Website
+                                </AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete &quot;
+                                  {website.name}
+                                  &quot;? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction
+                                  onClick={() => handleDelete(website.id)}
+                                  className='bg-destructive hover:bg-destructive/90'
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
