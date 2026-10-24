@@ -38,6 +38,7 @@ const getStatusIcon = (status: string) => {
     case 'failed':
       return <XCircle className='h-4 w-4 text-red-500' />;
     case 'in_progress':
+    case 'running':
       return <Clock className='h-4 w-4 text-amber-500' />;
     default:
       return <AlertCircle className='h-4 w-4 text-gray-500' />;
@@ -51,6 +52,7 @@ const getStatusColor = (status: string) => {
     case 'failed':
       return 'bg-red-50 text-red-700 border-red-200';
     case 'in_progress':
+    case 'running':
       return 'bg-amber-50 text-amber-700 border-amber-200';
     default:
       return 'bg-gray-50 text-gray-700 border-gray-200';
@@ -376,6 +378,27 @@ export default function CrawlsPage() {
               </CardHeader>
 
               <CardContent className='pt-0'>
+                {(crawl.status === 'in_progress' ||
+                  crawl.status === 'running') && (
+                  <div className='mb-4 space-y-1.5' aria-label='Crawl progress'>
+                    <div className='flex justify-between text-xs text-muted-foreground'>
+                      <span>Crawling</span>
+                      <span>{crawl.progress ?? 0}%</span>
+                    </div>
+                    <div
+                      className='h-2 overflow-hidden rounded-full bg-muted'
+                      role='progressbar'
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={crawl.progress ?? 0}
+                    >
+                      <div
+                        className='h-full rounded-full bg-primary transition-[width] duration-300'
+                        style={{ width: `${crawl.progress ?? 0}%` }}
+                      />
+                    </div>
+                  </div>
+                )}
                 <div className='grid grid-cols-2 gap-4 mb-4'>
                   <div className='flex items-center gap-2'>
                     <LinkIcon className='h-4 w-4 text-muted-foreground' />

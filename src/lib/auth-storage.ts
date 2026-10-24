@@ -37,4 +37,5 @@ export function clearAuthTokens(): void {
 
   document.cookie = `${ACCESS_TOKEN_COOKIE}=; Path=/; Max-Age=0; SameSite=Strict`;
   document.cookie = `${REFRESH_TOKEN_COOKIE}=; Path=/; Max-Age=0; SameSite=Strict`;
+  window.dispatchEvent(new Event('deadlink:auth-logout'));
 }

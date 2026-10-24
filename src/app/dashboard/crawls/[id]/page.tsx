@@ -31,6 +31,7 @@ const getStatusIcon = (status: string) => {
     case 'failed':
       return <XCircle className='h-5 w-5 text-red-500' />;
     case 'in_progress':
+    case 'running':
       return <Clock className='h-5 w-5 text-amber-500' />;
     default:
       return <AlertCircle className='h-5 w-5 text-gray-500' />;
@@ -44,6 +45,7 @@ const getStatusColor = (status: string) => {
     case 'failed':
       return 'bg-red-50 text-red-700 border-red-200';
     case 'in_progress':
+    case 'running':
       return 'bg-amber-50 text-amber-700 border-amber-200';
     default:
       return 'bg-gray-50 text-gray-700 border-gray-200';
@@ -257,6 +259,28 @@ export default function CrawlDetailsPage() {
           </div>
         </CardHeader>
       </Card>
+
+      {(crawlResult.status === 'in_progress' ||
+        crawlResult.status === 'running') && (
+        <section className='space-y-2' aria-label='Crawl progress'>
+          <div className='flex justify-between text-sm text-muted-foreground'>
+            <span>Crawl in progress</span>
+            <span>{crawlResult.progress ?? 0}%</span>
+          </div>
+          <div
+            className='h-2 overflow-hidden rounded-full bg-muted'
+            role='progressbar'
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={crawlResult.progress ?? 0}
+          >
+            <div
+              className='h-full rounded-full bg-primary transition-[width] duration-300'
+              style={{ width: `${crawlResult.progress ?? 0}%` }}
+            />
+          </div>
+        </section>
+      )}
 
       {/* Crawl Overview */}
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>

@@ -1,5 +1,6 @@
 'use client';
 
+import { CrawlRealtimeProvider } from '@/components/providers/crawl-realtime-provider';
 import { createApiClient } from '@/lib/api-client';
 import { loginAtom, logoutAtom } from '@/lib/auth-atoms';
 import { getAccessToken, getRefreshToken } from '@/lib/auth-storage';
@@ -43,5 +44,5 @@ export function ApiProvider({ children }: ApiProviderProps) {
     });
   }, [login, logout]);
 
-  return <>{children}</>;
+  return <CrawlRealtimeProvider>{children}</CrawlRealtimeProvider>;
 }
