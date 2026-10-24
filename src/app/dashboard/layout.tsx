@@ -1,6 +1,7 @@
 'use client';
 
 import { DashboardSidebar } from '@/components/layout/sidebar';
+import { NotificationBell } from '@/components/shared/notification-bell';
 import { Badge } from '@/components/ui/badge';
 import {
   Breadcrumb,
@@ -20,7 +21,7 @@ import { useAuthState } from '@/hooks/use-auth';
 import { loginAtom } from '@/lib/auth-atoms';
 import { getCookie } from '@/lib/cookie-utils';
 import { useSetAtom } from 'jotai';
-import { Activity, Bell } from 'lucide-react';
+import { Activity } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
@@ -147,10 +148,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 All Systems Online
               </Badge>
             </div>
-            <button className='relative rounded-md p-2 hover:bg-accent'>
-              <Bell className='h-4 w-4' />
-              <span className='absolute top-1 right-1 h-2 w-2 rounded-full bg-primary' />
-            </button>
+            <NotificationBell />
           </div>
         </header>
         <div className='flex flex-1 flex-col gap-4 p-4 pt-0'>{children}</div>

@@ -8,6 +8,10 @@ import type {
   CrawlResultResponse,
   CrawlsResponse,
 } from '@/types/crawls';
+import type {
+  Notification,
+  NotificationsResponse,
+} from '@/types/notifications';
 import { useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
@@ -25,6 +29,7 @@ interface CrawlEvent {
 }
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+const NOTIFICATIONS_QUERY_KEY = ['notifications', 'list'] as const;
 
 function updateCrawl(crawl: CrawlResult, event: CrawlEvent): CrawlResult {
   if (crawl.id !== event.crawlId) return crawl;
@@ -143,6 +148,44 @@ export function CrawlRealtimeProvider({
       }
     };
 
+    const onNotification = (notification: Notification) => {
+      if (
+        !notification ||
+        typeof notification.id !== 'string' ||
+        typeof notification.crawlId !== 'string' ||
+        typeof notification.title !== 'string' ||
+        typeof notification.message !== 'string'
+      ) {
+        return;
+      }
+
+      const current = queryClient.getQueryData<NotificationsResponse>(
+        NOTIFICATIONS_QUERY_KEY
+      );
+      if (!current) {
+        void queryClient.invalidateQueries({
+          queryKey: NOTIFICATIONS_QUERY_KEY,
+        });
+        return;
+      }
+      if (
+        current.data.notifications.some((item) => item.id === notification.id)
+      ) {
+        return;
+      }
+
+      queryClient.setQueryData<NotificationsResponse>(NOTIFICATIONS_QUERY_KEY, {
+        ...current,
+        data: {
+          notifications: [notification, ...current.data.notifications].slice(
+            0,
+            20
+          ),
+          unreadCount: current.data.unreadCount + (notification.readAt ? 0 : 1),
+        },
+      });
+    };
+
     const onConnectError = (error: Error & { data?: { code?: string } }) => {
       if (
         error.data?.code !== 'TOKEN_EXPIRED' ||
@@ -180,6 +223,9 @@ export function CrawlRealtimeProvider({
         queryKey: ['dashboard', 'overview'],
       });
       void queryClient.invalidateQueries({ queryKey: ['websites'] });
+      void queryClient.invalidateQueries({
+        queryKey: NOTIFICATIONS_QUERY_KEY,
+      });
     };
 
     const onAuthLogout = () => socket.disconnect();
@@ -200,6 +246,7 @@ export function CrawlRealtimeProvider({
     socket.on('crawl:progress', onCrawlEvent);
     socket.on('crawl:completed', onCrawlEvent);
     socket.on('crawl:failed', onCrawlEvent);
+    socket.on('notification:new', onNotification);
     socket.on('connect_error', onConnectError);
     socket.on('connect', onConnect);
     socket.on('auth:expired', onAuthExpired);
@@ -211,6 +258,7 @@ export function CrawlRealtimeProvider({
       socket.off('crawl:progress', onCrawlEvent);
       socket.off('crawl:completed', onCrawlEvent);
       socket.off('crawl:failed', onCrawlEvent);
+      socket.off('notification:new', onNotification);
       socket.off('connect_error', onConnectError);
       socket.off('connect', onConnect);
       socket.off('auth:expired', onAuthExpired);
