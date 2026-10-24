@@ -5,10 +5,11 @@ export const useBrokenLinks = (
   page: number = 1,
   limit: number = 20,
   errorType?: string,
-  isFixed?: boolean
+  isFixed?: boolean,
+  search?: string
 ) => {
   return useQuery({
-    queryKey: ['brokenLinks', page, limit, errorType, isFixed],
-    queryFn: () => getBrokenLinks({ page, limit, errorType, isFixed }),
+    queryKey: ['brokenLinks', page, limit, errorType, isFixed, search],
+    queryFn: () => getBrokenLinks({ page, limit, errorType, isFixed, search }),
   });
 };

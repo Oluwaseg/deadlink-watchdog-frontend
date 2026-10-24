@@ -31,12 +31,14 @@ export default function BrokenLinksPage() {
   const [page, setPage] = useState(1);
   const [errorType, setErrorType] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [fixedFilter, setFixedFilter] = useState<string>('all');
 
   const { data, isLoading, error, refetch } = useBrokenLinks(
     page,
     20,
     errorType === 'all' ? '' : errorType,
-    undefined
+    fixedFilter === 'all' ? undefined : fixedFilter === 'fixed',
+    searchQuery
   );
 
   const getErrorIcon = (errorType: string) => {
@@ -47,7 +49,7 @@ export default function BrokenLinksPage() {
         return <Server className='h-4 w-4' />;
       case 'timeout':
         return <Clock className='h-4 w-4' />;
-      case 'connection_error':
+      case 'connection_refused':
         return <Wifi className='h-4 w-4' />;
       default:
         return <AlertTriangle className='h-4 w-4' />;
@@ -62,7 +64,7 @@ export default function BrokenLinksPage() {
         return 'bg-red-100 text-red-800 border-red-200';
       case 'timeout':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'connection_error':
+      case 'connection_refused':
         return 'bg-purple-100 text-purple-800 border-purple-200';
       default:
         return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -77,7 +79,7 @@ export default function BrokenLinksPage() {
         return <Server className='h-5 w-5 text-red-600' />;
       case 'timeout':
         return <Clock className='h-5 w-5 text-yellow-600' />;
-      case 'connection_error':
+      case 'connection_refused':
         return <Wifi className='h-5 w-5 text-purple-600' />;
       default:
         return <AlertTriangle className='h-5 w-5 text-gray-600' />;
@@ -148,7 +150,7 @@ export default function BrokenLinksPage() {
   }
 
   // No data state
-  if (!data?.data?.recentBrokenLinks) {
+  if (!data?.data) {
     return (
       <div className='flex h-96 flex-col items-center justify-center space-y-4'>
         <div className='rounded-full bg-green-100 p-3'>
@@ -167,13 +169,6 @@ export default function BrokenLinksPage() {
   }
 
   const { recentBrokenLinks, summary, pagination } = data.data;
-
-  // Filter broken links based on search query
-  const filteredLinks = recentBrokenLinks.filter(
-    (link) =>
-      link.url.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      link.sourceUrl.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <div className='space-y-6'>
@@ -236,13 +231,22 @@ export default function BrokenLinksPage() {
                 <Input
                   placeholder='Search broken links...'
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setPage(1);
+                  }}
                   className='pl-10'
                 />
               </div>
             </div>
             <div className='flex gap-2'>
-              <Select value={errorType} onValueChange={setErrorType}>
+              <Select
+                value={errorType}
+                onValueChange={(value) => {
+                  setErrorType(value);
+                  setPage(1);
+                }}
+              >
                 <SelectTrigger className='w-48'>
                   <Filter className='h-4 w-4 mr-2' />
                   <SelectValue placeholder='Error Type' />
@@ -254,9 +258,25 @@ export default function BrokenLinksPage() {
                     500 Server Error
                   </SelectItem>
                   <SelectItem value='timeout'>Timeout</SelectItem>
-                  <SelectItem value='connection_error'>
+                  <SelectItem value='connection_refused'>
                     Connection Error
                   </SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={fixedFilter}
+                onValueChange={(value) => {
+                  setFixedFilter(value);
+                  setPage(1);
+                }}
+              >
+                <SelectTrigger className='w-40'>
+                  <SelectValue placeholder='Link status' />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value='all'>All Links</SelectItem>
+                  <SelectItem value='unfixed'>Unfixed</SelectItem>
+                  <SelectItem value='fixed'>Fixed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -266,7 +286,7 @@ export default function BrokenLinksPage() {
 
       {/* Broken Links List */}
       <div className='space-y-4'>
-        {filteredLinks.length === 0 ? (
+        {recentBrokenLinks.length === 0 ? (
           <Card>
             <CardContent className='p-12 text-center'>
               <Search className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
@@ -279,7 +299,7 @@ export default function BrokenLinksPage() {
             </CardContent>
           </Card>
         ) : (
-          filteredLinks.map((link: BrokenLink) => (
+          recentBrokenLinks.map((link: BrokenLink) => (
             <Card key={link.id} className='hover:shadow-md transition-shadow'>
               <CardContent className='p-6'>
                 <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4'>
@@ -320,6 +340,9 @@ export default function BrokenLinksPage() {
                     {link.statusCode && (
                       <Badge variant='secondary'>{link.statusCode}</Badge>
                     )}
+                    <Badge variant={link.isFixed ? 'default' : 'outline'}>
+                      {link.isFixed ? 'Fixed' : 'Unfixed'}
+                    </Badge>
 
                     <div className='text-sm text-muted-foreground'>
                       {new Date(link.createdAt).toLocaleDateString('en-US', {

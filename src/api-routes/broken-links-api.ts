@@ -6,6 +6,7 @@ interface GetBrokenLinksParams {
   limit?: number;
   errorType?: string;
   isFixed?: boolean;
+  search?: string;
 }
 
 export const getBrokenLinks = async (
@@ -17,6 +18,7 @@ export const getBrokenLinks = async (
   if (params.errorType) queryParams.append('errorType', params.errorType);
   if (params.isFixed !== undefined)
     queryParams.append('isFixed', params.isFixed.toString());
+  if (params.search?.trim()) queryParams.append('search', params.search.trim());
 
   const apiClient = getApiClient();
   return apiClient.get<BrokenLinksResponse>(

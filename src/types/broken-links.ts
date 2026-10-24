@@ -3,7 +3,9 @@ export interface BrokenLink {
   url: string;
   sourceUrl: string;
   errorType: string;
-  statusCode: number;
+  statusCode: number | null;
+  isFixed: boolean;
+  fixedAt: string | null;
   createdAt: string;
 }
 
@@ -13,6 +15,8 @@ export interface ErrorSummary {
 }
 
 export interface Pagination {
+  page: number;
+  limit: number;
   total: number;
   pages: number;
 }
