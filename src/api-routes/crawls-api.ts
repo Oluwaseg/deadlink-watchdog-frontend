@@ -15,10 +15,25 @@ export const getCrawls = async (
     page: page.toString(),
     limit: limit.toString(),
   });
-  if (status) queryParams.append('status', status);
+  if (status) {
+    queryParams.append('status', status === 'in_progress' ? 'running' : status);
+  }
   if (websiteId) queryParams.append('websiteId', websiteId);
 
-  return apiClient.get<CrawlsResponse>(`${API_BASE}?${queryParams.toString()}`);
+  const response = await apiClient.get<CrawlsResponse>(
+    `${API_BASE}?${queryParams.toString()}`
+  );
+
+  return {
+    ...response,
+    data: {
+      ...response.data,
+      crawlResults: response.data.crawlResults.map((crawl) => ({
+        ...crawl,
+        status: crawl.status === 'running' ? 'in_progress' : crawl.status,
+      })),
+    },
+  };
 };
 
 // Get crawl statistics summary
