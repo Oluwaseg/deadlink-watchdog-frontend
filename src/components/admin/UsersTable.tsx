@@ -66,6 +66,7 @@ export function UsersTable() {
           <TableHead>Name</TableHead>
           <TableHead>Email</TableHead>
           <TableHead>Role</TableHead>
+          <TableHead>Website Usage</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Actions</TableHead>
         </TableRow>
@@ -78,6 +79,11 @@ export function UsersTable() {
             </TableCell>
             <TableCell>{user.email}</TableCell>
             <TableCell>{user.role}</TableCell>
+            <TableCell>
+              {typeof user.websiteCount === 'number'
+                ? `${user.websiteCount} / 3`
+                : 'N/A / 3'}
+            </TableCell>
             <TableCell>
               <span
                 className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${

@@ -51,6 +51,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { useWebsites } from '@/hooks/use-websites';
+import { getApiErrorMessage } from '@/lib/api-client';
 import {
   Activity,
   AlertTriangle,
@@ -66,7 +67,7 @@ import {
   Trash2,
   TrendingUp,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 interface WebsiteFormData {
   name: string;
@@ -119,6 +120,7 @@ export default function WebsitesPage() {
   const [createError, setCreateError] = useState<string | null>(null);
   const [createFormData, setCreateFormData] =
     useState<WebsiteFormData>(initialFormData);
+  const createRequestInFlight = useRef(false);
 
   // Edit Modal states
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -139,6 +141,13 @@ export default function WebsitesPage() {
     category === 'all' ? '' : category,
     isActive === undefined ? undefined : isActive
   );
+  const { data: websiteCountData, refetch: refetchWebsiteCount } = useWebsites(
+    1,
+    1
+  );
+  const totalWebsiteCount = websiteCountData?.data.pagination.total;
+  const websiteLimitReached =
+    totalWebsiteCount === undefined || totalWebsiteCount >= 3;
 
   const resetCreateForm = () => {
     setCreateFormData({ ...initialFormData });
@@ -153,6 +162,8 @@ export default function WebsitesPage() {
 
   const handleCreateWebsite = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (createRequestInFlight.current) return;
+    createRequestInFlight.current = true;
     setIsCreating(true);
     setCreateError(null);
 
@@ -185,13 +196,34 @@ export default function WebsitesPage() {
       setIsCreateModalOpen(false);
       resetCreateForm();
       refetch();
+      refetchWebsiteCount();
     } catch (err) {
-      setCreateError(
-        err instanceof Error
-          ? err.message
-          : 'An error occurred while creating the website'
-      );
+      const apiError = err as {
+        response?: { data?: { code?: string; error?: string } };
+      };
+      if (apiError.response?.data?.code === 'WEBSITE_LIMIT_REACHED') {
+        setCreateError(
+          apiError.response.data.error ||
+            'You can monitor up to 3 websites. Delete a website before adding another.'
+        );
+        refetchWebsiteCount();
+      } else if (apiError.response?.data?.code?.startsWith('CRAWL_')) {
+        setCreateError(
+          getApiErrorMessage(
+            err,
+            'The initial crawl could not be queued. Please try again.'
+          )
+        );
+      } else {
+        setCreateError(
+          getApiErrorMessage(
+            err,
+            'An error occurred while creating the website'
+          )
+        );
+      }
     } finally {
+      createRequestInFlight.current = false;
       setIsCreating(false);
     }
   };
@@ -292,6 +324,7 @@ export default function WebsitesPage() {
     try {
       await deleteWebsite(websiteId);
       refetch();
+      refetchWebsiteCount();
     } catch (err) {
       setError(
         err instanceof Error
@@ -309,9 +342,7 @@ export default function WebsitesPage() {
       refetch();
     } catch (err) {
       setError(
-        err instanceof Error
-          ? err.message
-          : 'An error occurred while crawling the website'
+        getApiErrorMessage(err, 'An error occurred while crawling the website')
       );
     } finally {
       setLoadingWebsites((prev) => {
@@ -426,10 +457,21 @@ export default function WebsitesPage() {
             <p className='text-muted-foreground'>
               Monitor and manage your website health and performance
             </p>
+            {websiteLimitReached && (
+              <p className='text-sm text-amber-700' role='status'>
+                You can monitor up to 3 websites. Delete a website before adding
+                another.
+              </p>
+            )}
           </div>
           <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
             <DialogTrigger asChild>
-              <Button size='lg' className='shadow-lg' onClick={resetCreateForm}>
+              <Button
+                size='lg'
+                className='shadow-lg'
+                onClick={resetCreateForm}
+                disabled={websiteLimitReached}
+              >
                 <Plus className='h-5 w-5 mr-2' />
                 Add Website
               </Button>
@@ -441,7 +483,9 @@ export default function WebsitesPage() {
                   Add New Website
                 </DialogTitle>
                 <DialogDescription>
-                  Add a new website to monitor its health and performance
+                  {websiteLimitReached
+                    ? 'You can monitor up to 3 websites. Delete a website before adding another.'
+                    : 'Add a new website to monitor its health and performance'}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleCreateWebsite} className='space-y-4'>
@@ -582,7 +626,7 @@ export default function WebsitesPage() {
                   </Button>
                   <Button
                     type='submit'
-                    disabled={isCreating}
+                    disabled={isCreating || websiteLimitReached}
                     className='min-w-32'
                   >
                     {isCreating ? (
@@ -621,7 +665,11 @@ export default function WebsitesPage() {
               onOpenChange={setIsCreateModalOpen}
             >
               <DialogTrigger asChild>
-                <Button size='lg' onClick={resetCreateForm}>
+                <Button
+                  size='lg'
+                  onClick={resetCreateForm}
+                  disabled={websiteLimitReached}
+                >
                   <Plus className='h-5 w-5 mr-2' />
                   Add Your First Website
                 </Button>
@@ -633,7 +681,9 @@ export default function WebsitesPage() {
                     Add New Website
                   </DialogTitle>
                   <DialogDescription>
-                    Add a new website to monitor its health and performance
+                    {websiteLimitReached
+                      ? 'You can monitor up to 3 websites. Delete a website before adding another.'
+                      : 'Add a new website to monitor its health and performance'}
                   </DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleCreateWebsite} className='space-y-4'>
@@ -778,7 +828,7 @@ export default function WebsitesPage() {
                     </Button>
                     <Button
                       type='submit'
-                      disabled={isCreating}
+                      disabled={isCreating || websiteLimitReached}
                       className='min-w-32'
                     >
                       {isCreating ? (
@@ -820,10 +870,21 @@ export default function WebsitesPage() {
           <p className='text-muted-foreground'>
             Monitor and manage your website health and performance
           </p>
+          {websiteLimitReached && (
+            <p className='text-sm text-amber-700' role='status'>
+              You can monitor up to 3 websites. Delete a website before adding
+              another.
+            </p>
+          )}
         </div>
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
-            <Button size='lg' className='shadow-lg' onClick={resetCreateForm}>
+            <Button
+              size='lg'
+              className='shadow-lg'
+              onClick={resetCreateForm}
+              disabled={websiteLimitReached}
+            >
               <Plus className='h-5 w-5 mr-2' />
               Add Website
             </Button>
@@ -835,7 +896,9 @@ export default function WebsitesPage() {
                 Add New Website
               </DialogTitle>
               <DialogDescription>
-                Add a new website to monitor its health and performance
+                {websiteLimitReached
+                  ? 'You can monitor up to 3 websites. Delete a website before adding another.'
+                  : 'Add a new website to monitor its health and performance'}
               </DialogDescription>
             </DialogHeader>
             <form onSubmit={handleCreateWebsite} className='space-y-4'>
@@ -976,7 +1039,7 @@ export default function WebsitesPage() {
                 </Button>
                 <Button
                   type='submit'
-                  disabled={isCreating}
+                  disabled={isCreating || websiteLimitReached}
                   className='min-w-32'
                 >
                   {isCreating ? (

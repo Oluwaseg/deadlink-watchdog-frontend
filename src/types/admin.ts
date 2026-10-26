@@ -42,6 +42,7 @@ export interface User {
   role: 'user' | 'admin';
   isActive: boolean;
   createdAt: string;
+  websiteCount: number;
 }
 
 export interface UsersResponse {
@@ -153,4 +154,4 @@ export interface UserAnalytics {
       createdAt: string;
     }>;
   };
-} 
+}

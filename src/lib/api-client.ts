@@ -27,6 +27,20 @@ export interface ApiClientOptions {
   onAuthError?: () => void;
 }
 
+export const getApiErrorMessage = (
+  error: unknown,
+  fallback: string
+): string => {
+  if (typeof error === 'object' && error !== null && 'response' in error) {
+    const response = (error as AxiosError<{ error?: string }>).response;
+    if (typeof response?.data?.error === 'string') {
+      return response.data.error;
+    }
+  }
+
+  return error instanceof Error ? error.message : fallback;
+};
+
 export class ApiClient {
   private readonly client: AxiosInstance;
 
