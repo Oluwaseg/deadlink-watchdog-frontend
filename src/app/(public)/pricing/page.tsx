@@ -8,11 +8,11 @@ import Link from 'next/link';
 export const metadata: Metadata = {
   title: 'Pricing, DeadLink Watchdog',
   description:
-    'Simple pricing built to grow with you. Free while in early access, with Pro and Enterprise plans on the way.',
+    'Monitor up to 3 websites for free during early access. Pro and Enterprise plans are planned for later.',
   openGraph: {
     title: 'Pricing, DeadLink Watchdog',
     description:
-      "Start free. Stay free while you're small. Pro and Enterprise coming soon.",
+      'Monitor up to 3 websites for free during early access. Pro and Enterprise are coming later.',
   },
 };
 
@@ -23,6 +23,7 @@ interface Plan {
   featured?: boolean;
   features: string[];
   cta: string;
+  href: string;
 }
 
 const plans: Plan[] = [
@@ -31,12 +32,13 @@ const plans: Plan[] = [
     tagline: 'For getting started',
     status: 'Available now',
     features: [
-      'Monitor a few sites',
-      'Monthly crawls',
-      'Email alerts when something breaks',
-      'A clean, simple health score',
+      'Monitor up to 3 websites for free during early access.',
+      'Run manual crawls or schedule daily, weekly, or monthly checks',
+      'Email alerts when a notification address is configured',
+      'Health scores, crawl history, and broken-link details',
     ],
-    cta: 'Start Free, No Card Needed',
+    cta: 'Start free, no card needed',
+    href: '/auth/register',
   },
   {
     name: 'Pro',
@@ -44,26 +46,30 @@ const plans: Plan[] = [
     status: 'Coming soon',
     featured: true,
     features: [
-      'More sites, more often',
-      'Weekly or daily crawls',
-      'Email + webhook alerts',
-      'Deeper reporting and history',
-      'API access for your own dashboards',
+      'Up to 25 monitored websites',
+      'Weekly or daily scheduled crawls',
+      'Email and webhook notifications',
+      '30-day data retention',
+      'Priority support and custom crawler settings',
+      'Advanced reporting and API access',
     ],
-    cta: 'Join the Waitlist',
+    cta: 'Ask about Pro',
+    href: '/#contact',
   },
   {
     name: 'Enterprise',
     tagline: 'For organizations where downtime is a headline risk',
     status: 'Coming soon',
     features: [
-      'Unlimited sites',
-      'Custom crawl schedules',
-      'Dedicated support',
-      'White-label reporting',
-      'Multi-user access',
+      'Unlimited monitored websites',
+      'Custom crawl schedules and integrations',
+      'Email, webhook, and custom notifications',
+      '90-day data retention',
+      'Dedicated support and SLA options',
+      'White-label reports and multi-user access',
     ],
-    cta: 'Talk to Us',
+    cta: 'Discuss Enterprise',
+    href: '/#contact',
   },
 ];
 
@@ -86,8 +92,9 @@ export default function PricingPage() {
           </Reveal>
           <Reveal delay={100}>
             <p className='mx-auto mt-6 max-w-2xl text-pretty text-lg leading-relaxed text-muted-foreground'>
-              We're in early access, which means right now, everything is free.
-              Here's where we're headed.
+              The Free plan is available now during early access, with no
+              payment required. Pro and Enterprise are planned for later and are
+              not available yet.
             </p>
           </Reveal>
         </div>
@@ -106,11 +113,6 @@ export default function PricingPage() {
                       : 'border-border bg-surface'
                   )}
                 >
-                  {plan.featured && (
-                    <span className='absolute -top-3 left-8 inline-flex items-center rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground shadow-elegant'>
-                      Most requested
-                    </span>
-                  )}
                   <header>
                     <div className='flex items-center justify-between'>
                       <h2 className='text-xl font-semibold tracking-tight text-foreground'>
@@ -153,7 +155,7 @@ export default function PricingPage() {
                           'bg-foreground text-background hover:bg-foreground/90'
                       )}
                     >
-                      <Link href='#'>
+                      <Link href={plan.href}>
                         {plan.cta}
                         <ArrowRight className='ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5' />
                       </Link>
@@ -166,8 +168,8 @@ export default function PricingPage() {
 
           <Reveal delay={280}>
             <p className='mx-auto mt-12 max-w-2xl text-center text-sm text-muted-foreground'>
-              Prices aren't locked in yet, join the waitlist and you'll be the
-              first to know, and early supporters get a preferential rate.
+              Pro and Enterprise are planned tiers, not current subscriptions.
+              Their prices and release dates have not been announced.
             </p>
           </Reveal>
         </div>

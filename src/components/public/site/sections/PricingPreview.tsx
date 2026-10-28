@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { Reveal } from '../Reveal';
 
 const bullets = [
-  'Monitor a few sites free, forever while in early access',
-  'Monthly crawls with email alerts',
-  'Health score and trend history',
+  'Monitor up to 3 websites',
+  'Run manual crawls or schedule daily, weekly, or monthly checks',
+  'Get email alerts when a notification address is configured',
+  'Review health scores, crawl history, and broken-link details',
 ];
 
 export function PricingPreview() {
@@ -24,12 +25,12 @@ export function PricingPreview() {
                 Pricing
               </p>
               <h2 className='mt-3 text-balance text-3xl font-semibold tracking-[-0.02em] text-foreground sm:text-4xl lg:text-[44px]'>
-                Start free. Stay free while you're small.
+                Monitor up to 3 websites for free.
               </h2>
               <p className='mt-5 max-w-xl text-pretty text-lg leading-relaxed text-muted-foreground'>
-                DeadLink Watchdog is free to use right now while we're in early
-                access. Pro and Enterprise plans, with more sites, faster crawl
-                schedules, and deeper analytics - are on the way.
+                The Free plan is available now during early access, with no
+                payment required. Pro and Enterprise are planned for later and
+                are not available yet.
               </p>
               <div className='mt-8'>
                 <Button
@@ -38,7 +39,7 @@ export function PricingPreview() {
                   className='group h-12 rounded-full px-6'
                 >
                   <Link href='/pricing'>
-                    See what's coming
+                    Compare plans
                     <ArrowRight className='ml-1 h-4 w-4 transition-transform group-hover:translate-x-0.5' />
                   </Link>
                 </Button>
@@ -55,7 +56,7 @@ export function PricingPreview() {
                     <p className='mt-1 text-3xl font-semibold tracking-tight text-foreground'>
                       ₦0{' '}
                       <span className='text-base font-normal text-muted-foreground'>
-                        / forever in early access
+                        / during early access
                       </span>
                     </p>
                   </div>
