@@ -12,114 +12,90 @@ export function Analytics() {
     useWebsiteAnalytics();
   const { data: userAnalytics, isLoading: isLoadingUsers } = useUserAnalytics();
 
-  if (isLoadingWebsites || isLoadingUsers) {
-    return <div>Loading analytics...</div>;
-  }
+  if (isLoadingWebsites || isLoadingUsers) return null;
+  if (!websiteAnalytics?.data || !userAnalytics?.data) return null;
 
-  if (!websiteAnalytics?.data || !userAnalytics?.data) {
-    return <div>No analytics data available</div>;
-  }
-
-  const { totalWebsites, websitesByCategory, websitesByStatus, newWebsites } =
+  const { websitesByCategory, websitesByStatus, newWebsites } =
     websiteAnalytics.data;
   const { totalUsers, activeUsers, newUsers } = userAnalytics.data;
-
-  // Calculate active users percentage
-  const activeUsersPercentage = Math.round((activeUsers / totalUsers) * 100);
+  const activeUsersPercentage = totalUsers
+    ? Math.round((activeUsers / totalUsers) * 100)
+    : 0;
 
   return (
-    <div className='space-y-4'>
-      <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-4'>
+    <section className='space-y-4' aria-labelledby='platform-analytics-title'>
+      <h2 id='platform-analytics-title' className='text-lg font-semibold'>
+        Platform analytics
+      </h2>
+      <div className='grid gap-4 lg:grid-cols-3'>
         <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>
-              Total Websites
-            </CardTitle>
-            <Globe className='h-4 w-4 text-muted-foreground' />
+          <CardHeader>
+            <CardTitle>Website categories</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className='text-2xl font-bold'>{totalWebsites}</div>
-            <p className='text-xs text-muted-foreground'>
-              {newWebsites.length} new this month
-            </p>
+            {Object.keys(websitesByCategory).length === 0 ? (
+              <p className='text-sm text-muted-foreground'>No websites yet</p>
+            ) : (
+              <div className='space-y-2'>
+                {Object.entries(websitesByCategory).map(([category, count]) => (
+                  <div
+                    key={category}
+                    className='flex justify-between gap-4 text-sm'
+                  >
+                    <span className='capitalize'>{category}</span>
+                    <span className='font-medium'>{count}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Total Users</CardTitle>
-            <Users className='h-4 w-4 text-muted-foreground' />
+          <CardHeader>
+            <CardTitle>Website status</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>{totalUsers}</div>
-            <p className='text-xs text-muted-foreground'>
-              {newUsers.length} new this month
-            </p>
+          <CardContent className='space-y-3'>
+            <div className='flex items-center justify-between text-sm'>
+              <span className='flex items-center gap-2 text-muted-foreground'>
+                <Globe className='size-4' /> Active
+              </span>
+              <span className='font-medium'>{websitesByStatus.active}</span>
+            </div>
+            <div className='flex items-center justify-between text-sm'>
+              <span className='flex items-center gap-2 text-muted-foreground'>
+                <Activity className='size-4' /> Inactive
+              </span>
+              <span className='font-medium'>{websitesByStatus.inactive}</span>
+            </div>
+            <div className='border-t pt-3 text-sm text-muted-foreground'>
+              {newWebsites.length} added in the last 30 days
+            </div>
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-            <CardTitle className='text-sm font-medium'>Active Users</CardTitle>
-            <Activity className='h-4 w-4 text-muted-foreground' />
+          <CardHeader>
+            <CardTitle>User activity</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className='text-2xl font-bold'>{activeUsers}</div>
-            <p className='text-xs text-muted-foreground'>
-              {activeUsersPercentage}% of total users
-            </p>
+          <CardContent className='space-y-3'>
+            <div className='flex items-center justify-between text-sm'>
+              <span className='flex items-center gap-2 text-muted-foreground'>
+                <Users className='size-4' /> Active users
+              </span>
+              <span className='font-medium'>
+                {activeUsers} ({activeUsersPercentage}%)
+              </span>
+            </div>
+            <div className='flex items-center justify-between border-t pt-3 text-sm'>
+              <span className='text-muted-foreground'>
+                New in the last 30 days
+              </span>
+              <span className='font-medium'>{newUsers.length}</span>
+            </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Website Categories */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Website Categories</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className='space-y-2'>
-            {Object.entries(websitesByCategory).map(([category, count]) => (
-              <div
-                key={category}
-                className='flex items-center justify-between rounded-lg border p-2'
-              >
-                <div>
-                  <p className='font-medium'>{category}</p>
-                  <p className='text-sm text-muted-foreground'>
-                    {count} websites
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Website Status */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Website Status</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className='space-y-2'>
-            <div className='flex items-center justify-between rounded-lg border p-2'>
-              <div>
-                <p className='font-medium'>Active Websites</p>
-                <p className='text-sm text-muted-foreground'>
-                  {websitesByStatus.active} websites
-                </p>
-              </div>
-            </div>
-            <div className='flex items-center justify-between rounded-lg border p-2'>
-              <div>
-                <p className='font-medium'>Inactive Websites</p>
-                <p className='text-sm text-muted-foreground'>
-                  {websitesByStatus.inactive} websites
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    </section>
   );
 }

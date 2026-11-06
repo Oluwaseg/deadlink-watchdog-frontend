@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Activity, AlertCircle, Globe, Link2, Users } from 'lucide-react';
 import { useAdminStats } from '../../hooks/use-admin-stats';
+import { Analytics } from './Analytics';
 import { StatsCard } from './StatsCard';
 
 export function AdminDashboard() {
@@ -116,6 +117,8 @@ export function AdminDashboard() {
           </div>
         </CardContent>
       </Card>
+
+      <Analytics />
     </div>
   );
 }

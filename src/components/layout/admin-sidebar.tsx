@@ -29,7 +29,6 @@ import {
   BarChart3,
   ChevronDown,
   LogOut,
-  PieChart,
   Settings,
   User,
   Users,
@@ -41,7 +40,6 @@ const navigation = [
   { name: 'Overview', href: '/admin', icon: BarChart3 },
   { name: 'Users', href: '/admin/users', icon: Users },
   { name: 'Queue', href: '/admin/queue', icon: Activity },
-  { name: 'Analytics', href: '/admin/analytics', icon: PieChart },
 ];
 
 export function AdminSidebar() {
