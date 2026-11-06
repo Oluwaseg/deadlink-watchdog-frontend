@@ -58,34 +58,6 @@ export interface UsersResponse {
   };
 }
 
-export interface Website {
-  id: string;
-  url: string;
-  isActive: boolean;
-  isFlagged: boolean;
-  reports: number;
-  createdAt: string;
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-  };
-}
-
-export interface WebsitesModerationResponse {
-  success: boolean;
-  data: {
-    websites: Website[];
-    pagination: {
-      page: number;
-      limit: number;
-      total: number;
-      pages: number;
-    };
-  };
-}
-
 export interface QueueStats {
   crawl: {
     waiting: number;

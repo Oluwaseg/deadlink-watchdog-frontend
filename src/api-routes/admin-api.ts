@@ -5,7 +5,6 @@ import type {
   UserAnalytics,
   UsersResponse,
   WebsiteAnalytics,
-  WebsitesModerationResponse,
 } from '../types/admin';
 
 const API_BASE = '/api/admin';
@@ -41,31 +40,6 @@ export const updateUserStatus = (
 // Update user role
 export const updateUserRole = (userId: string, role: 'user' | 'admin') => {
   return getApiClient().put(`${API_BASE}/users/${userId}/role`, { role });
-};
-
-// Get websites requiring moderation
-export const getWebsitesModeration = ({
-  page = 1,
-  limit = 20,
-  status,
-}: { page?: number; limit?: number; status?: string } = {}) => {
-  const queryParams = new URLSearchParams();
-  if (page) queryParams.append('page', page.toString());
-  if (limit) queryParams.append('limit', limit.toString());
-  if (status) queryParams.append('status', status);
-  return getApiClient().get<WebsitesModerationResponse>(
-    `${API_BASE}/websites/moderation?${queryParams.toString()}`
-  );
-};
-
-// Moderate a website
-export const moderateWebsite = (
-  websiteId: string,
-  action: 'block' | 'unblock'
-) => {
-  return getApiClient().put(`${API_BASE}/websites/${websiteId}/moderate`, {
-    action,
-  });
 };
 
 // Get queue statistics and jobs

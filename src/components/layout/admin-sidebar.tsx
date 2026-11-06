@@ -28,7 +28,6 @@ import {
   Activity,
   BarChart3,
   ChevronDown,
-  Globe,
   LogOut,
   PieChart,
   Settings,
@@ -41,7 +40,6 @@ import { usePathname, useRouter } from 'next/navigation';
 const navigation = [
   { name: 'Overview', href: '/admin', icon: BarChart3 },
   { name: 'Users', href: '/admin/users', icon: Users },
-  { name: 'Moderation', href: '/admin/websites', icon: Globe },
   { name: 'Queue', href: '/admin/queue', icon: Activity },
   { name: 'Analytics', href: '/admin/analytics', icon: PieChart },
 ];
