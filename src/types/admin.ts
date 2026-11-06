@@ -105,6 +105,14 @@ export interface WebsiteAnalytics {
       isActive: boolean;
       createdAt: string;
     }>;
+    newWebsiteCount: number;
+    crawlsByDay: Array<{
+      date: string;
+      completed: number;
+      failed: number;
+      brokenLinks: number;
+      averageHealth: number | null;
+    }>;
   };
 }
 
@@ -124,6 +132,11 @@ export interface UserAnalytics {
       lastName: string;
       role: string;
       createdAt: string;
+    }>;
+    newUserCount: number;
+    userGrowth: Array<{
+      date: string;
+      count: number;
     }>;
   };
 }

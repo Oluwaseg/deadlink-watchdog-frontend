@@ -48,14 +48,14 @@ export const getQueueStats = () => {
 };
 
 // Get website analytics
-export const getWebsiteAnalytics = (period: string = '7d') => {
+export const getWebsiteAnalytics = (period: number = 30) => {
   return getApiClient().get<WebsiteAnalytics>(
     `${API_BASE}/analytics/websites?period=${period}`
   );
 };
 
 // Get user analytics
-export const getUserAnalytics = (period: string = '7d') => {
+export const getUserAnalytics = (period: number = 30) => {
   return getApiClient().get<UserAnalytics>(
     `${API_BASE}/analytics/users?period=${period}`
   );

@@ -2,11 +2,11 @@ import { useQuery } from '@tanstack/react-query';
 import { getUserAnalytics, getWebsiteAnalytics } from '../api-routes/admin-api';
 
 interface UseAnalyticsOptions {
-  period?: string;
+  period?: number;
 }
 
 export const useWebsiteAnalytics = ({
-  period = '30d',
+  period = 30,
 }: UseAnalyticsOptions = {}) => {
   return useQuery({
     queryKey: ['admin', 'analytics', 'websites', { period }],
@@ -14,9 +14,7 @@ export const useWebsiteAnalytics = ({
   });
 };
 
-export const useUserAnalytics = ({
-  period = '30d',
-}: UseAnalyticsOptions = {}) => {
+export const useUserAnalytics = ({ period = 30 }: UseAnalyticsOptions = {}) => {
   return useQuery({
     queryKey: ['admin', 'analytics', 'users', { period }],
     queryFn: () => getUserAnalytics(period),
