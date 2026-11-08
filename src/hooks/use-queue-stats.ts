@@ -6,7 +6,7 @@ export const useQueueStats = () => {
   return useQuery<QueueResponse>({
     queryKey: ['admin', 'queue'],
     queryFn: getQueueStats,
-    refetchInterval: 30000, // Refetch every 30 seconds
+    refetchInterval: 5000,
     refetchIntervalInBackground: false,
   });
 };

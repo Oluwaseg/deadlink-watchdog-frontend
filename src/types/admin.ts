@@ -82,8 +82,14 @@ export interface QueueResponse {
     activeJobs: Array<{
       id: string;
       name: string;
+      queue: 'crawl' | 'notification';
       status: string;
       createdAt: string;
+      progress: number | null;
+      websiteName: string | null;
+      websiteUrl: string | null;
+      userName: string | null;
+      scheduledBy: string | null;
     }>;
   };
 }
