@@ -11,5 +11,7 @@ export function useWebsites(
   return useQuery<WebsitesResponse>({
     queryKey: ['websites', page, limit, category, isActive],
     queryFn: () => getWebsites(page, limit, category, isActive),
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false,
   });
 }

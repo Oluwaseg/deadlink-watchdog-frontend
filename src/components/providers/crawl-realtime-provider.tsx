@@ -145,7 +145,23 @@ export function CrawlRealtimeProvider({
           queryKey: ['dashboard', 'overview'],
         });
         void queryClient.invalidateQueries({ queryKey: ['websites'] });
+        void queryClient.invalidateQueries({ queryKey: ['brokenLinks'] });
       }
+    };
+
+    const onDashboardRefresh = () => {
+      void queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+      void queryClient.invalidateQueries({ queryKey: ['websites'] });
+      void queryClient.invalidateQueries({ queryKey: ['crawls'] });
+      void queryClient.invalidateQueries({ queryKey: ['brokenLinks'] });
+      void queryClient.invalidateQueries({ queryKey: NOTIFICATIONS_QUERY_KEY });
+    };
+
+    const onAdminDashboardRefresh = () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'analytics'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'queue'] });
     };
 
     const onNotification = (notification: Notification) => {
@@ -223,9 +239,12 @@ export function CrawlRealtimeProvider({
         queryKey: ['dashboard', 'overview'],
       });
       void queryClient.invalidateQueries({ queryKey: ['websites'] });
+      void queryClient.invalidateQueries({ queryKey: ['brokenLinks'] });
       void queryClient.invalidateQueries({
         queryKey: NOTIFICATIONS_QUERY_KEY,
       });
+      onDashboardRefresh();
+      onAdminDashboardRefresh();
     };
 
     const onAuthLogout = () => socket.disconnect();
@@ -247,6 +266,8 @@ export function CrawlRealtimeProvider({
     socket.on('crawl:completed', onCrawlEvent);
     socket.on('crawl:failed', onCrawlEvent);
     socket.on('notification:new', onNotification);
+    socket.on('dashboard:refresh', onDashboardRefresh);
+    socket.on('admin:dashboard:refresh', onAdminDashboardRefresh);
     socket.on('connect_error', onConnectError);
     socket.on('connect', onConnect);
     socket.on('auth:expired', onAuthExpired);
@@ -259,6 +280,8 @@ export function CrawlRealtimeProvider({
       socket.off('crawl:completed', onCrawlEvent);
       socket.off('crawl:failed', onCrawlEvent);
       socket.off('notification:new', onNotification);
+      socket.off('dashboard:refresh', onDashboardRefresh);
+      socket.off('admin:dashboard:refresh', onAdminDashboardRefresh);
       socket.off('connect_error', onConnectError);
       socket.off('connect', onConnect);
       socket.off('auth:expired', onAuthExpired);

@@ -7,5 +7,8 @@ export const useDashboardOverview = () => {
     queryKey: ['dashboard', 'overview'],
     queryFn: dashboardApi.getDashboardOverview,
     staleTime: 60 * 1000, // 1 minute
+    refetchInterval: 30000,
+    refetchIntervalInBackground: false,
+    refetchOnWindowFocus: true,
   });
 };

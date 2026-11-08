@@ -17,5 +17,7 @@ export const useUsers = ({
   return useQuery({
     queryKey: ['admin', 'users', { page, limit, role }],
     queryFn: () => getUsers({ page, limit, role }),
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false,
   });
 };

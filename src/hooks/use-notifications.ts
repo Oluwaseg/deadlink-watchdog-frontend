@@ -13,6 +13,8 @@ export function useNotifications() {
   const query = useQuery({
     queryKey: notificationsQueryKey,
     queryFn: () => getNotifications(),
+    refetchInterval: 30000,
+    refetchIntervalInBackground: false,
   });
 
   const markRead = useMutation({

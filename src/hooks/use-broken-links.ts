@@ -11,5 +11,7 @@ export const useBrokenLinks = (
   return useQuery({
     queryKey: ['brokenLinks', page, limit, errorType, isFixed, search],
     queryFn: () => getBrokenLinks({ page, limit, errorType, isFixed, search }),
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false,
   });
 };

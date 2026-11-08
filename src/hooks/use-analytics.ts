@@ -11,6 +11,8 @@ export const useWebsiteAnalytics = ({
   return useQuery({
     queryKey: ['admin', 'analytics', 'websites', { period }],
     queryFn: () => getWebsiteAnalytics(period),
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false,
   });
 };
 
@@ -18,5 +20,7 @@ export const useUserAnalytics = ({ period = 30 }: UseAnalyticsOptions = {}) => {
   return useQuery({
     queryKey: ['admin', 'analytics', 'users', { period }],
     queryFn: () => getUserAnalytics(period),
+    refetchInterval: 60000,
+    refetchIntervalInBackground: false,
   });
 };
