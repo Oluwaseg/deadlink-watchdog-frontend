@@ -5,17 +5,16 @@ import type { Metadata } from 'next';
 export const metadata: Metadata = {
   title: 'Changelog, DeadLink Watchdog',
   description:
-    "What's new in DeadLink Watchdog. Fresh features, fixes, and improvements shipped every week.",
+    'A running history of shipped features, fixes, and improvements to DeadLink Watchdog.',
   openGraph: {
     title: 'Changelog, DeadLink Watchdog',
     description:
-      'The latest features, fixes, and improvements shipped by the team.',
+      'A running history of shipped features, fixes, and improvements to DeadLink Watchdog.',
   },
 };
 
 type Kind = 'feature' | 'improvement' | 'fix';
 type Entry = {
-  version: string;
   date: string;
   title: string;
   items: { kind: Kind; text: string }[];
@@ -23,68 +22,122 @@ type Entry = {
 
 const entries: Entry[] = [
   {
-    version: 'v1.4.0',
-    date: 'July 8, 2026',
-    title: 'Slack alerts and mobile menu overhaul',
+    date: 'November 8, 2026',
+    title: 'Queue visibility and reliable scheduling',
     items: [
       {
-        kind: 'feature',
-        text: 'Slack channel integration for real-time broken link alerts.',
+        kind: 'improvement',
+        text: 'Admin queue jobs show the monitored website, job owner, trigger type, start time, and current progress.',
       },
       {
         kind: 'improvement',
-        text: 'Full-screen mobile menu with larger tap targets.',
+        text: 'Recurring crawls avoid overlapping runs and retry temporary scheduling contention.',
       },
       {
         kind: 'improvement',
-        text: 'Accessibility button with text size and reduced motion controls.',
+        text: 'Dashboard and admin data refresh after realtime events, with periodic polling to recover missed updates.',
       },
     ],
   },
   {
-    version: 'v1.3.2',
-    date: 'June 27, 2026',
-    title: 'Faster crawls, calmer dashboard',
+    date: 'November 6, 2026',
+    title: 'Better crawl follow-up and analytics',
     items: [
       {
         kind: 'improvement',
-        text: 'Crawler is 34% faster on sites with 10k+ pages.',
+        text: 'Scheduled crawls recheck known broken links and mark them fixed only after a successful check.',
       },
       {
-        kind: 'fix',
-        text: 'Health score no longer flickers while a new crawl is running.',
+        kind: 'improvement',
+        text: 'Crawl email reports include clearer results and follow-up details.',
       },
       {
-        kind: 'fix',
-        text: "Fixed an edge case where PDF links weren't being followed.",
+        kind: 'improvement',
+        text: 'Admin analytics include daily website and user statistics with consistent date handling.',
       },
     ],
   },
   {
-    version: 'v1.3.0',
-    date: 'June 12, 2026',
-    title: 'Nigerian-hosted probes',
+    date: 'November 5, 2026',
+    title: 'Deployment and configuration hardening',
     items: [
       {
         kind: 'feature',
-        text: 'New probe location in Lagos for realistic response times.',
-      },
-      { kind: 'feature', text: 'Currency-aware pricing for local plans.' },
-      { kind: 'improvement', text: 'Cleaner report exports (CSV + JSON).' },
-    ],
-  },
-  {
-    version: 'v1.2.0',
-    date: 'May 21, 2026',
-    title: 'Health score v2',
-    items: [
-      {
-        kind: 'feature',
-        text: 'Redesigned health score with per-section breakdowns.',
+        text: 'Added a Docker image and documented Docker Compose deployment.',
       },
       {
         kind: 'improvement',
-        text: "Weekly digest email summarising your site's health.",
+        text: 'Redis connection settings now use a validated REDIS_URL configuration.',
+      },
+      {
+        kind: 'improvement',
+        text: 'Trusted proxy hop configuration is explicit and covered by tests.',
+      },
+    ],
+  },
+  {
+    date: 'October 26, 2026',
+    title: 'Controlled crawl concurrency',
+    items: [
+      {
+        kind: 'improvement',
+        text: 'Crawl workers enforce per-user execution limits so one account cannot occupy all crawl slots.',
+      },
+    ],
+  },
+  {
+    date: 'October 24, 2026',
+    title: 'Live crawl updates and notifications',
+    items: [
+      {
+        kind: 'feature',
+        text: 'Crawl progress, completion, and failure events are delivered to authenticated users in real time.',
+      },
+      {
+        kind: 'feature',
+        text: 'Added in-app notifications for completed and failed crawls.',
+      },
+    ],
+  },
+  {
+    date: 'October 23, 2025',
+    title: 'A more resilient crawler',
+    items: [
+      {
+        kind: 'improvement',
+        text: 'Transient crawl failures can be retried with exponential backoff.',
+      },
+      {
+        kind: 'improvement',
+        text: 'Added URL safety checks, per-domain throttling, and clearer error classification.',
+      },
+      {
+        kind: 'improvement',
+        text: 'Link checks use controlled concurrency and caching to reduce redundant work.',
+      },
+    ],
+  },
+  {
+    date: 'June 18, 2025',
+    title: 'Admin monitoring tools',
+    items: [
+      {
+        kind: 'feature',
+        text: 'Added an admin dashboard for system statistics, user management, queue activity, and analytics.',
+      },
+    ],
+  },
+  {
+    date: 'June 10, 2025',
+    title: 'Dashboard and account settings',
+    items: [
+      {
+        kind: 'feature',
+        text: 'Introduced the signed-in dashboard for managing websites and reviewing crawl results.',
+      },
+      {
+        kind: 'feature',
+        text: 'Added account settings for profile information and password changes.',
       },
     ],
   },
@@ -140,7 +193,7 @@ export default function ChangelogPage() {
 
           <div className='mt-16 space-y-14'>
             {entries.map((entry, i) => (
-              <Reveal key={entry.version} delay={i * 60}>
+              <Reveal key={entry.date} delay={i * 60}>
                 <article className='relative pl-8 sm:pl-10'>
                   <span
                     aria-hidden
@@ -151,9 +204,6 @@ export default function ChangelogPage() {
                     className='absolute left-[5px] top-8 h-[calc(100%-1rem)] w-px bg-border'
                   />
                   <div className='flex flex-wrap items-baseline gap-x-3 gap-y-1'>
-                    <span className='inline-flex items-center rounded-full border border-border bg-surface px-2.5 py-0.5 text-xs font-semibold text-foreground'>
-                      {entry.version}
-                    </span>
                     <time className='text-xs uppercase tracking-[0.14em] text-muted-foreground'>
                       {entry.date}
                     </time>

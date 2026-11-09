@@ -65,10 +65,10 @@ export default function TermsPage() {
         <p>
           Questions? Email{' '}
           <a
-            href='mailto:hello@deadlinkwatchdog.com'
+            href='mailto:oluwasegunsam56@gmail.com'
             className='text-primary hover:underline'
           >
-            hello@deadlinkwatchdog.com
+            oluwasegunsam56@gmail.com
           </a>
           .
         </p>

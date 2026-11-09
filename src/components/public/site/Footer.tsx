@@ -19,11 +19,12 @@ const nav = {
     { label: 'How it works', scrollId: 'how-it-works' },
     { label: 'Health score', scrollId: 'how-it-works' },
     { label: 'Changelog', href: '/changelog' },
+    { label: 'Feedback', href: '/feedback' },
   ],
   Company: [
     { label: 'Support', scrollId: 'support' },
     // { label: 'Support', href: '/support' },
-    { label: 'Contact', href: 'mailto:hello@deadlinkwatchdog.com' },
+    { label: 'Contact', href: 'mailto:oluwasegunsam56@gmail.com' },
     { label: 'Status', href: '/status' },
     { label: 'Cookie preferences', href: '/cookies' },
   ],
@@ -91,17 +92,29 @@ export function Footer() {
             </p>
             <div className='mt-6 flex items-center gap-2'>
               {[
-                { icon: IconBrandTwitter, label: 'Twitter', href: '#' },
-                { icon: IconBrandGithub, label: 'GitHub', href: '#' },
+                {
+                  icon: IconBrandTwitter,
+                  label: 'X / Twitter',
+                  href: 'https://x.com/SamuelOluw10759',
+                },
+                {
+                  icon: IconBrandGithub,
+                  label: 'GitHub',
+                  href: 'https://github.com/oluwaseg',
+                },
                 {
                   icon: IconMail,
                   label: 'Email',
-                  href: 'mailto:hello@deadlinkwatchdog.com',
+                  href: 'mailto:oluwasegunsam56@gmail.com',
                 },
               ].map(({ icon: Icon, label, href }) => (
                 <a
                   key={label}
                   href={href}
+                  target={href.startsWith('http') ? '_blank' : undefined}
+                  rel={
+                    href.startsWith('http') ? 'noopener noreferrer' : undefined
+                  }
                   aria-label={label}
                   className='inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-surface text-muted-foreground transition-colors hover:border-primary/40 hover:bg-primary-soft hover:text-primary'
                 >

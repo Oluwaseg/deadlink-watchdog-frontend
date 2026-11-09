@@ -53,10 +53,10 @@ export default function CookiesPage() {
         <p>
           Questions about cookies? Email us at{' '}
           <a
-            href='mailto:hello@deadlinkwatchdog.com'
+            href='mailto:oluwasegunsam56@gmail.com'
             className='text-primary hover:underline'
           >
-            hello@deadlinkwatchdog.com
+            oluwasegunsam56@gmail.com
           </a>
           .
         </p>

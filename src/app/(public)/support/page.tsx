@@ -25,8 +25,8 @@ const channels = [
     icon: Send,
     title: 'Email us',
     body: "For anything that isn't urgent. We usually reply within a few hours.",
-    cta: 'hello@deadlinkwatchdog.com',
-    href: 'mailto:hello@deadlinkwatchdog.com',
+    cta: 'oluwasegunsam56@gmail.com',
+    href: 'mailto:oluwasegunsam56@gmail.com',
   },
   {
     icon: BookOpen,
@@ -152,7 +152,7 @@ export default function SupportPage() {
                 variant='secondary'
                 className='h-11 rounded-full px-5'
               >
-                <a href='mailto:hello@deadlinkwatchdog.com'>Email support</a>
+                <a href='mailto:oluwasegunsam56@gmail.com'>Email support</a>
               </Button>
             </div>
           </Reveal>

@@ -11,6 +11,7 @@ const links = [
   { href: '/', label: 'Home' },
   { href: '/pricing', label: 'Pricing' },
   { href: '/about', label: 'About' },
+  { href: '/feedback', label: 'Feedback' },
 ];
 
 export function Navbar() {

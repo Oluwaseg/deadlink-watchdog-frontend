@@ -7,7 +7,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -33,7 +32,6 @@ import {
   LogOut,
   Search,
   Settings,
-  User,
 } from 'lucide-react';
 import NextLink from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -183,16 +181,6 @@ export function DashboardSidebar() {
                 align='end'
                 sideOffset={4}
               >
-                <DropdownMenuItem>
-                  <NextLink
-                    href='/dashboard/profile'
-                    className='flex items-center w-full'
-                  >
-                    <User className='mr-2 h-4 w-4' />
-                    Profile
-                  </NextLink>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={handleLogout}
                   className='text-destructive'

@@ -78,13 +78,13 @@ export function ContactSection() {
               </p>
               <div className='space-y-4 pt-4'>
                 <a
-                  href='mailto:hello@deadlinkwatchdog.com'
+                  href='mailto:oluwasegunsam56@gmail.com'
                   className='flex items-center gap-3 text-sm text-foreground hover:text-primary transition-colors'
                 >
                   <span className='flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10 text-primary'>
                     <Mail className='h-5 w-5' />
                   </span>
-                  hello@deadlinkwatchdog.com
+                  oluwasegunsam56@gmail.com
                 </a>
                 <div className='flex items-center gap-3 text-sm text-muted-foreground'>
                   <span className='flex h-10 w-10 items-center justify-center rounded-lg bg-secondary/20 text-secondary-foreground'>
