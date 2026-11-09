@@ -65,24 +65,22 @@ export function DashboardSidebar() {
 
   return (
     <Sidebar collapsible='icon'>
-     
-<SidebarHeader>
-  <div className="flex items-center gap-2 px-2 py-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-    <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-      <Activity className="size-4" strokeWidth={2.5} />
-    </div>
+      <SidebarHeader>
+        <div className='flex items-center gap-2 px-2 py-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0'>
+          <div className='flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground'>
+            <Activity className='size-4' strokeWidth={2.5} />
+          </div>
 
-    <div className="grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden">
-      <span className="truncate font-semibold">DeadLink</span>
-      <span className="truncate text-xs">WATCHDOG</span>
-    </div>
+          <div className='grid flex-1 text-left text-sm leading-tight group-data-[collapsible=icon]:hidden'>
+            <span className='truncate font-semibold'>DeadLink</span>
+            <span className='truncate text-xs'>WATCHDOG</span>
+          </div>
 
-    <div className="group-data-[collapsible=icon]:hidden">
-      <ModeToggle />
-    </div>
-  </div>
-</SidebarHeader>
-
+          <div className='group-data-[collapsible=icon]:hidden'>
+            <ModeToggle />
+          </div>
+        </div>
+      </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
@@ -136,7 +134,7 @@ export function DashboardSidebar() {
         </SidebarGroup>
 
         {/* Status Section - Only show when expanded */}
-        <SidebarGroup className='group-data-[collapsible=icon]:hidden'>
+        <SidebarGroup className='mt-auto group-data-[collapsible=icon]:hidden'>
           <SidebarGroupLabel>System Status</SidebarGroupLabel>
           <SidebarGroupContent>
             <div className='rounded-lg border bg-background p-3'>
@@ -192,15 +190,6 @@ export function DashboardSidebar() {
                   >
                     <User className='mr-2 h-4 w-4' />
                     Profile
-                  </NextLink>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <NextLink
-                    href='/dashboard/settings'
-                    className='flex items-center w-full'
-                  >
-                    <Settings className='mr-2 h-4 w-4' />
-                    Settings
                   </NextLink>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

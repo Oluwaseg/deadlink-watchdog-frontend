@@ -30,7 +30,6 @@ import {
   ChevronDown,
   LogOut,
   Settings,
-  User,
   Users,
 } from 'lucide-react';
 import NextLink from 'next/link';
@@ -106,7 +105,7 @@ export function AdminSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <SidebarGroup className='group-data-[collapsible=icon]:hidden'>
+        <SidebarGroup className='mt-auto group-data-[collapsible=icon]:hidden'>
           <SidebarGroupLabel>System Status</SidebarGroupLabel>
           <SidebarGroupContent>
             <div className='rounded-lg border bg-background p-3'>
@@ -155,15 +154,6 @@ export function AdminSidebar() {
                 align='end'
                 sideOffset={4}
               >
-                <DropdownMenuItem asChild>
-                  <NextLink
-                    href='/dashboard/settings'
-                    className='flex w-full items-center'
-                  >
-                    <User className='mr-2 h-4 w-4' />
-                    Profile
-                  </NextLink>
-                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <NextLink
                     href='/dashboard/settings'

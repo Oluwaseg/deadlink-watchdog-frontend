@@ -1,7 +1,6 @@
 'use client';
 
 import { AdminSidebar } from '@/components/layout/admin-sidebar';
-import { Badge } from '@/components/ui/badge';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -20,7 +19,6 @@ import { useAuthState } from '@/hooks/use-auth';
 import { loginAtom } from '@/lib/auth-atoms';
 import { getCookie } from '@/lib/cookie-utils';
 import { useSetAtom } from 'jotai';
-import { Activity, Bell } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
@@ -118,25 +116,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                 ))}
               </BreadcrumbList>
             </Breadcrumb>
-          </div>
-          <div className='ml-auto flex items-center gap-2 px-4'>
-            <div className='hidden items-center gap-2 md:flex'>
-              <div className='flex items-center gap-1 text-sm text-muted-foreground'>
-                <Activity className='h-3 w-3 text-primary' />
-                <span>Live</span>
-              </div>
-              <Badge variant='outline' className='text-xs'>
-                All Systems Online
-              </Badge>
-            </div>
-            <button
-              type='button'
-              aria-label='Notifications'
-              className='relative rounded-md p-2 hover:bg-accent'
-            >
-              <Bell className='h-4 w-4' />
-              <span className='absolute right-1 top-1 h-2 w-2 rounded-full bg-primary' />
-            </button>
           </div>
         </header>
         <div className='flex flex-1 flex-col gap-4 p-4 pt-0'>{children}</div>

@@ -2,7 +2,6 @@
 
 import { DashboardSidebar } from '@/components/layout/sidebar';
 import { NotificationBell } from '@/components/shared/notification-bell';
-import { Badge } from '@/components/ui/badge';
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,7 +20,6 @@ import { useAuthState } from '@/hooks/use-auth';
 import { loginAtom } from '@/lib/auth-atoms';
 import { getCookie } from '@/lib/cookie-utils';
 import { useSetAtom } from 'jotai';
-import { Activity } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import type { ReactNode } from 'react';
 import { useEffect, useState } from 'react';
@@ -139,15 +137,6 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             </Breadcrumb>
           </div>
           <div className='ml-auto flex items-center gap-2 px-4'>
-            <div className='hidden md:flex items-center gap-2'>
-              <div className='flex items-center gap-1 text-sm text-muted-foreground'>
-                <Activity className='h-3 w-3 text-primary' />
-                <span>Live</span>
-              </div>
-              <Badge variant='outline' className='text-xs'>
-                All Systems Online
-              </Badge>
-            </div>
             <NotificationBell />
           </div>
         </header>
